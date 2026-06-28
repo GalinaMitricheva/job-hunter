@@ -34,7 +34,8 @@ function ollamaComplete(
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     // stream: true keeps the socket alive as tokens arrive, avoiding idle timeouts
-    const payload = JSON.stringify({ model, prompt, stream: true, ...(system ? { system } : {}) })
+    // num_predict: -1 = no token limit; without this small models truncate mid-JSON
+    const payload = JSON.stringify({ model, prompt, stream: true, options: { num_predict: -1 }, ...(system ? { system } : {}) })
     const url = new URL('/api/generate', baseUrl)
     let tokensSeen = 0
     let result = ''
@@ -116,18 +117,30 @@ function closeOpenJson(s: string): string {
   const stack: string[] = []
   let inString = false
   let escape = false
-  for (const ch of s) {
+  let lastValueEnd = s.length  // tracks where we can safely truncate to
+
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i]
     if (escape) { escape = false; continue }
     if (ch === '\\' && inString) { escape = true; continue }
-    if (ch === '"') { inString = !inString; continue }
+    if (ch === '"') {
+      inString = !inString
+      if (!inString) lastValueEnd = i + 1  // just closed a string — safe point
+      continue
+    }
     if (inString) continue
-    if (ch === '{') stack.push('}')
-    else if (ch === '[') stack.push(']')
-    else if (ch === '}' || ch === ']') stack.pop()
+    if (ch === '{' || ch === '[') stack.push(ch === '{' ? '}' : ']')
+    else if (ch === '}' || ch === ']') { stack.pop(); lastValueEnd = i + 1 }
+    else if (ch === ',' || ch === ':') lastValueEnd = i + 1
   }
-  // Close any open string first
-  if (inString) s += '"'
-  return s + stack.reverse().join('')
+
+  if (inString) {
+    // Mid-string truncation: close the string then drop the incomplete key/value
+    // by rolling back to the last safe comma or colon boundary
+    s = s.slice(0, lastValueEnd)
+  }
+
+  return s.trimEnd().replace(/,\s*$/, '') + stack.reverse().join('')
 }
 
 export async function scoreJobRelevance(
