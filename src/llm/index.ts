@@ -97,8 +97,10 @@ function parseJsonFromLlm<T>(raw: string): T {
   // 1. Try as-is
   try { return JSON.parse(candidate) as T } catch { /* fall through */ }
 
-  // 2. Strip JS-style comments
+  // 2. Strip JS-style and Python-style comments
   candidate = candidate.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '')
+  // Strip # comments that appear outside string values (after a comma, quote, or bracket)
+  candidate = candidate.replace(/([:,\[{]\s*(?:"[^"]*")?\s*)#[^\n]*/g, '$1')
 
   // 3. Remove trailing commas before } or ]
   candidate = candidate.replace(/,(\s*[}\]])/g, '$1')
