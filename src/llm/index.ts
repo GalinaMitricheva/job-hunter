@@ -102,13 +102,18 @@ function parseJsonFromLlm<T>(raw: string): T {
   // Strip # comments that appear outside string values (after a comma, quote, or bracket)
   candidate = candidate.replace(/([:,\[{]\s*(?:"[^"]*")?\s*)#[^\n]*/g, '$1')
 
-  // 3. Remove trailing commas before } or ]
+  // 3. Escape literal control characters inside string values
+  candidate = candidate.replace(/"((?:[^"\\]|\\.)*)"/g, (_m, content: string) =>
+    '"' + content.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t') + '"'
+  )
+
+  // 4. Remove trailing commas before } or ]
   candidate = candidate.replace(/,(\s*[}\]])/g, '$1')
 
-  // 4. Try again
+  // 5. Try again
   try { return JSON.parse(candidate) as T } catch { /* fall through */ }
 
-  // 5. If still truncated, attempt to close open structures
+  // 6. If still truncated, attempt to close open structures
   candidate = closeOpenJson(candidate)
   try { return JSON.parse(candidate) as T } catch (e) {
     throw new Error(`Could not parse LLM JSON output: ${(e as Error).message}\nRaw excerpt:\n${raw.slice(0, 300)}`)
