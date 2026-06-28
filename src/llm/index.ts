@@ -6,7 +6,7 @@ export async function llmComplete(prompt: string, system?: string): Promise<stri
   if (cfg.llm.provider === 'claude') {
     return claudeComplete(prompt, system, cfg.llm.model)
   }
-  return ollamaComplete(prompt, system, cfg.llm.ollamaBaseUrl, cfg.llm.ollamaModel)
+  return ollamaComplete(prompt, system, cfg.llm.ollamaBaseUrl, cfg.llm.ollamaModel, cfg.llm.ollamaTimeoutSec ?? 600)
 }
 
 async function claudeComplete(prompt: string, system: string | undefined, model: string): Promise<string> {
@@ -27,7 +27,8 @@ async function ollamaComplete(
   prompt: string,
   system: string | undefined,
   baseUrl: string,
-  model: string
+  model: string,
+  timeoutSec: number
 ): Promise<string> {
   const body: Record<string, unknown> = { model, prompt, stream: false }
   if (system) body.system = system
@@ -35,7 +36,7 @@ async function ollamaComplete(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout((cfg.llm.ollamaTimeoutSec ?? 600) * 1000)
+    signal: AbortSignal.timeout(timeoutSec * 1000)
   })
   if (!res.ok) throw new Error(`Ollama error: HTTP ${res.status}`)
   const data = (await res.json()) as { response?: string }
