@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; font-size: 10.5pt; color: #2c2c2c; padding: 52px 60px; line-height: 1.6; }
+  h1 { font-size: 22pt; font-weight: 300; letter-spacing: -1px; color: #111; margin-bottom: 6px; }
+  .contact-row { color: #888; font-size: 9.5pt; margin-bottom: 3px; letter-spacing: 0.3px; }
+  .sep { color: #ccc; margin: 0 6px; }
+  h2 { font-size: 8.5pt; color: #999; text-transform: uppercase; letter-spacing: 3px; font-weight: 600; margin: 28px 0 10px; }
+  p { margin-bottom: 8px; color: #333; }
+  .experience-item, .education-item { margin-bottom: 18px; }
+  .exp-header, .edu-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
+  .exp-title { font-weight: 600; font-size: 11pt; color: #1a1a1a; }
+  .edu-degree { font-weight: 600; font-size: 11pt; color: #1a1a1a; }
+  .exp-company, .edu-institution { color: #666; font-size: 10pt; }
+  .exp-dates, .edu-year { color: #aaa; font-size: 9.5pt; white-space: nowrap; padding-left: 12px; flex-shrink: 0; }
+  .exp-desc { color: #444; margin-top: 4px; font-size: 10pt; }
+  .achievements { margin-top: 5px; padding-left: 16px; color: #444; font-size: 10pt; }
+  .achievements li { margin-bottom: 3px; list-style: disc; }
+  .skills-wrap { display: flex; flex-wrap: wrap; gap: 4px 8px; }
+  .skill-tag { padding: 3px 10px; border: 1px solid #ddd; border-radius: 3px; font-size: 9.5pt; color: #555; }
+  .cert-item { margin-bottom: 5px; font-size: 10pt; color: #444; }
+  .cert-name { font-weight: 600; color: #333; }
+  .section { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+  <h1>{{FULL_NAME}}</h1>
+  <div class="contact-row">{{EMAIL}}<span class="sep">·</span>{{PHONE}}<span class="sep">·</span>{{LOCATION}}</div>
+  <div class="contact-row">{{LINKEDIN}}<span class="sep">·</span>{{GITHUB}}</div>
+
+  <div class="section">
+    <h2>Summary</h2>
+    <p>{{SUMMARY}}</p>
+  </div>
+
+  <div class="section">
+    <h2>Experience</h2>
+    {{EXPERIENCE}}
+  </div>
+
+  <div class="section">
+    <h2>Education</h2>
+    {{EDUCATION}}
+  </div>
+
+  <div class="section">
+    <h2>Skills</h2>
+    <div class="skills-wrap">{{SKILLS}}</div>
+  </div>
+
+  <div class="section">
+    {{CERTIFICATIONS}}
+  </div>
+</body>
+</html>
