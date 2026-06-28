@@ -61,7 +61,8 @@ function saveProfileToDb(parsed: Record<string, unknown>, rawText: string): void
     rawText
   )
 
-  const work = (parsed.work_experience as Array<Record<string, unknown>>) || []
+  const work = ((parsed.work_experience as Array<Record<string, unknown>>) || [])
+    .filter((e) => e.company && e.title)
   if (work.length > 0) {
     db.prepare('DELETE FROM work_experience').run()
     const insertExp = db.prepare(`
@@ -73,7 +74,8 @@ function saveProfileToDb(parsed: Record<string, unknown>, rawText: string): void
     })
   }
 
-  const edu = (parsed.education as Array<Record<string, unknown>>) || []
+  const edu = ((parsed.education as Array<Record<string, unknown>>) || [])
+    .filter((e) => e.institution && e.degree)
   if (edu.length > 0) {
     db.prepare('DELETE FROM education').run()
     const insertEdu = db.prepare(`
@@ -85,7 +87,8 @@ function saveProfileToDb(parsed: Record<string, unknown>, rawText: string): void
     })
   }
 
-  const skillsList = (parsed.skills as Array<Record<string, unknown>>) || []
+  const skillsList = ((parsed.skills as Array<Record<string, unknown>>) || [])
+    .filter((s) => s.name)
   if (skillsList.length > 0) {
     db.prepare('DELETE FROM skills').run()
     const insertSkill = db.prepare(`
