@@ -4,6 +4,7 @@ import { join } from 'path'
 export interface AppConfig {
   llm: {
     provider: 'claude' | 'ollama'
+    claudeApiKey: string
     model: string
     ollamaBaseUrl: string
     ollamaModel: string

@@ -1,6 +1,7 @@
 {
   "llm": {
     "provider": "claude",
+    "claudeApiKey": "",
     "model": "claude-sonnet-4-6",
     "ollamaBaseUrl": "http://localhost:11434",
     "ollamaModel": "llama3.2"

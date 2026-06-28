@@ -57,6 +57,7 @@ Edit `config.json`:
 {
   "llm": {
     "provider": "claude",
+    "claudeApiKey": "sk-ant-...",
     "model": "claude-sonnet-4-6",
     "ollamaBaseUrl": "http://localhost:11434",
     "ollamaModel": "llama3.2"
@@ -142,9 +143,8 @@ Switch between Claude and Ollama in `config.json`:
 
 **Claude (recommended):**
 ```json
-"llm": { "provider": "claude", "model": "claude-sonnet-4-6" }
+"llm": { "provider": "claude", "claudeApiKey": "sk-ant-...", "model": "claude-sonnet-4-6" }
 ```
-Set your API key: `ANTHROPIC_API_KEY=sk-ant-...`
 
 **Ollama (fully local, no API key):**
 ```json

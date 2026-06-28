@@ -10,7 +10,9 @@ export async function llmComplete(prompt: string, system?: string): Promise<stri
 }
 
 async function claudeComplete(prompt: string, system: string | undefined, model: string): Promise<string> {
-  const client = new Anthropic()
+  const apiKey = getConfig().llm.claudeApiKey || process.env.ANTHROPIC_API_KEY
+  if (!apiKey) throw new Error('No Claude API key found. Set llm.claudeApiKey in config.json.')
+  const client = new Anthropic({ apiKey })
   const msg = await client.messages.create({
     model,
     max_tokens: 2048,
