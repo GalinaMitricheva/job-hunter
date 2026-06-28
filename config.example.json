@@ -4,7 +4,8 @@
     "claudeApiKey": "",
     "model": "claude-sonnet-4-6",
     "ollamaBaseUrl": "http://localhost:11434",
-    "ollamaModel": "llama3.2"
+    "ollamaModel": "llama3.2",
+    "ollamaTimeoutSec": 600
   },
   "search": {
     "schedule": "0 8 * * *",

@@ -8,6 +8,7 @@ export interface AppConfig {
     model: string
     ollamaBaseUrl: string
     ollamaModel: string
+    ollamaTimeoutSec: number
   }
   search: {
     schedule: string

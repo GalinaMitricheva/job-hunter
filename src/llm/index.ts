@@ -35,7 +35,7 @@ async function ollamaComplete(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(120_000)
+    signal: AbortSignal.timeout((cfg.llm.ollamaTimeoutSec ?? 600) * 1000)
   })
   if (!res.ok) throw new Error(`Ollama error: HTTP ${res.status}`)
   const data = (await res.json()) as { response?: string }
