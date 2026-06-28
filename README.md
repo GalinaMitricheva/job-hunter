@@ -1,115 +1,186 @@
-# Job Hunter Pro
+# Job Hunter Agent
 
-A Windows desktop application that automates your job search — it stores your professional profile, runs scheduled searches on LinkedIn and company career pages, uses your local Ollama AI model to score matches and tailor your CV, and submits applications after you review and approve each one.
+A local job-search agent that automates your job search end-to-end — it imports your CV, builds a comprehensive professional profile, runs scheduled searches on LinkedIn and company career pages, uses an LLM to score matches and tailor your CV per posting, and submits applications after you review and approve each one.
 
-**All data stays on your machine. All AI runs locally via Ollama. No cloud required.**
+**All data stays on your machine. No cloud required (optional Claude API or local Ollama).**
 
 ---
 
 ## Features
 
-- **Professional Profile** — Full work history, education, skills, certifications, and job preferences stored in local SQLite
-- **Scheduled Job Search** — Searches LinkedIn and target company career pages on a configurable schedule (every 3h / 6h / 12h / daily / manual)
-- **AI Relevance Scoring** — Each job is scored 0–100 by your local Ollama model with a short reasoning note
-- **CV Tailoring** — Ollama rewrites your summary, reorders experience, and highlights matching skills for each role
+- **CV Import** — Drop a PDF, DOCX, or TXT file; the LLM parses it into a structured profile automatically
+- **Profile Quiz** — Interactive terminal interview fills any gaps the parser missed; answers persist between sessions
+- **Scheduled Job Search** — Searches LinkedIn and target company career pages on a configurable cron schedule
+- **AI Relevance Scoring** — Each job is scored 0–100 with a short reasoning note; only high-scoring matches proceed
+- **CV Tailoring** — LLM rewrites your summary, reorders experience, and highlights matching skills for each role
 - **Cover Letter Generation** — Tailored 3–4 paragraph cover letter per application
-- **3 PDF CV Templates** — Classic (ATS-friendly), Modern (two-column), Minimal (clean typography)
-- **Review Queue** — Three-column review: job description + tailored CV + cover letter side by side before you approve
-- **Full Auto-Apply** — Playwright fills and submits the application form, attaches your CV, and saves a confirmation screenshot
-- **History & Dashboard** — Searchable logs of every search and every application with CSV export
-- **System Tray** — Runs in background, notifies you of high-relevance matches
+- **3 PDF CV Templates** — Classic (ATS-friendly), Modern, Minimal
+- **Browser Review UI** — Approve or skip applications at `http://localhost:3000`; edit the cover letter inline before applying
+- **Auto-Apply** — Playwright fills and submits LinkedIn Easy Apply, Greenhouse, and Lever forms; saves a confirmation screenshot
+- **Manual Fallback** — If auto-apply isn't supported, the agent generates step-by-step instructions for manual submission
+- **History** — Full log of every search and application at `localhost:3000/history`
+- **Autonomous Mode** — Set `autoApply: true` in `config.json` to skip the review step entirely
 
 ---
 
 ## Prerequisites
 
-Before running the app, make sure you have:
-
-1. **Node.js 20+** — https://nodejs.org
-2. **Ollama** — https://ollama.com (install and start it)
-3. A language model pulled in Ollama — recommended:
-   ```
-   ollama pull llama3
-   ```
-   or `mistral`, `gemma3` for lighter hardware
+| Tool | Why | Install |
+|---|---|---|
+| **Node.js 20+** | Runs the agent | https://nodejs.org |
+| **Playwright Chromium** | LinkedIn scraping + auto-apply | `npx playwright install chromium` |
+| **Claude API key** *(or Ollama)* | LLM for scoring and tailoring | Set `ANTHROPIC_API_KEY` env var |
+| **Ollama** *(alternative to Claude)* | Local LLM option | https://ollama.com |
 
 ---
 
 ## Setup
 
 ```bash
-# Clone the repo
+# Clone
 git clone https://github.com/GalinaMitricheva/job-hunter.git
 cd job-hunter
 
 # Install dependencies
 npm install
 
-# Install Playwright browsers (needed for LinkedIn search and auto-apply)
+# Install Playwright browser
 npx playwright install chromium
+
+# Copy and fill in your config
+cp config.example.json config.json
 ```
+
+Edit `config.json`:
+
+```json
+{
+  "llm": {
+    "provider": "claude",
+    "model": "claude-sonnet-4-6",
+    "ollamaBaseUrl": "http://localhost:11434",
+    "ollamaModel": "llama3.2"
+  },
+  "search": {
+    "schedule": "0 8 * * *",
+    "fitScoreThreshold": 70,
+    "companyUrls": ["https://example.com/careers"],
+    "headlessBrowser": true
+  },
+  "linkedin": {
+    "email": "you@example.com",
+    "password": "yourpassword"
+  },
+  "autoApply": false,
+  "reviewPort": 3000
+}
+```
+
+> `config.json` is gitignored — your credentials never leave your machine.
 
 ---
 
-## Running in Development
+## Usage
+
+All commands go through a single entry point:
 
 ```bash
-npm run dev
+npx tsx agent.ts <command>
 ```
 
-This opens the Electron app in development mode with hot reload.
+| Command | What it does |
+|---|---|
+| `profile my-cv.pdf` | Parse your CV and quiz for missing info (first-time setup) |
+| `profile` | Re-run the full profile quiz without importing a file |
+| `search` | Run a job search session right now |
+| `review` | Start the review UI at `http://localhost:3000` |
+| `start` | Start scheduler + review UI together (normal daily use) |
 
----
-
-## Building for Windows
+### First-time setup
 
 ```bash
-npm run package
+# Import your CV and fill in any gaps
+npx tsx agent.ts profile my-cv.pdf
 ```
 
-This produces a Windows installer in the `dist/` folder.
+The agent will:
+1. Extract your experience, education, skills, and preferences from the file
+2. Ask follow-up questions in the terminal for anything that's missing or unclear
+3. Save everything to SQLite — you won't be asked again unless you re-run `profile`
+
+### Daily use
+
+```bash
+npx tsx agent.ts start
+```
+
+Leave this running. The agent searches on the schedule in `config.json` (default: 8 AM daily), scores matches, tailors CVs, and queues applications. Open `http://localhost:3000` whenever you want to review and approve.
+
+### Run a search immediately
+
+```bash
+npx tsx agent.ts search
+```
 
 ---
 
-## First Launch
+## Review UI
 
-On first launch, the app walks you through a setup wizard:
+Open `http://localhost:3000` in your browser after starting the agent.
 
-1. **Personal info** — name, email, phone, location, LinkedIn URL, professional summary
-2. **Work experience** — your most recent role (add more in Profile later)
-3. **Education** — degree, institution
-4. **Skills** — technical skills, soft skills, tools
-5. **Done** — ready to search
-
-After onboarding:
-
-1. Go to **Preferences** and set your target job titles (e.g. "Senior Software Engineer")
-2. Go to **Settings** and add your LinkedIn credentials (encrypted on your machine) and target company career page URLs
-3. Click **Run Search** in the sidebar
+- **Queue** — one card per pending application showing the job posting, your tailored CV, and the cover letter side by side
+- **Approve & Apply** — triggers Playwright auto-apply; falls back to manual instructions if the site isn't supported
+- **Skip** — removes the application from the queue
+- **Edit cover letter** — edit inline before approving
+- **History** — `localhost:3000/history` shows all submitted and skipped applications
 
 ---
 
-## Ollama Setup
+## LLM Configuration
 
-The app connects to Ollama at `http://localhost:11434` by default. You can change this in Settings.
+Switch between Claude and Ollama in `config.json`:
 
-- Go to **Settings → Ollama AI Configuration** to test the connection and select which installed model to use
-- If Ollama is offline, job search and manual editing still work — AI features (scoring, CV tailoring, cover letters) pause until Ollama is back
+**Claude (recommended):**
+```json
+"llm": { "provider": "claude", "model": "claude-sonnet-4-6" }
+```
+Set your API key: `ANTHROPIC_API_KEY=sk-ant-...`
+
+**Ollama (fully local, no API key):**
+```json
+"llm": { "provider": "ollama", "ollamaBaseUrl": "http://localhost:11434", "ollamaModel": "llama3.2" }
+```
 
 ---
 
-## LinkedIn Note
+## Autonomous Mode
 
-LinkedIn's Terms of Service prohibit automated access. The app mimics human browsing behavior to reduce detection risk. Use infrequent search schedules (daily or less) to minimize the chance of your account being flagged. You accept this risk by using the LinkedIn search feature.
+To skip the review step and have the agent apply automatically:
+
+```json
+"autoApply": true
+```
+
+The agent will still log everything to `localhost:3000/history` so you can see what was submitted.
 
 ---
 
 ## Data Location
 
-All data (SQLite database, generated CVs, screenshots) is stored in:
-- Windows: `%APPDATA%\job-hunter-pro\`
+All data is stored in `~/Documents/Job Hunter Pro/`:
 
-Use **Settings → Open Data Folder** to access it directly, or **Settings → Backup to ZIP** to export everything.
+```
+~/Documents/Job Hunter Pro/
+  job-hunter.db      SQLite database (profile, jobs, applications)
+  cvs/               Tailored CV PDFs
+  screenshots/       Auto-apply confirmation screenshots
+```
+
+---
+
+## LinkedIn Note
+
+LinkedIn's Terms of Service prohibit automated access. The agent mimics human browsing behavior. Use infrequent schedules (daily or less) to minimize the chance of your account being flagged. You accept this risk by using the LinkedIn search feature.
 
 ---
 
@@ -117,15 +188,15 @@ Use **Settings → Open Data Folder** to access it directly, or **Settings → B
 
 | Concern | Technology |
 |---|---|
-| App shell | Electron 29 |
-| Frontend | React 18 + Vite + Tailwind CSS |
+| Runtime | Node.js + TypeScript (tsx, no build step) |
 | Database | SQLite (better-sqlite3) |
-| AI | Ollama local API (user's own models) |
+| LLM | Claude API or Ollama (configurable) |
 | Job search | Playwright (Chromium) |
 | Auto-apply | Playwright form automation |
-| PDF generation | Electron's built-in printToPDF |
+| PDF generation | Playwright `page.pdf()` |
+| Review UI | Express + plain HTML (no frontend framework) |
 | Scheduling | node-cron |
-| Credential storage | Electron safeStorage (OS-level encryption) |
+| CV parsing | pdf-parse (PDF) + mammoth (DOCX) |
 
 ---
 
