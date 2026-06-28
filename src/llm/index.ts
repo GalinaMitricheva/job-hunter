@@ -1,4 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { request as httpRequest } from 'http'
+import { request as httpsRequest } from 'https'
 import { getConfig } from '../config'
 
 export async function llmComplete(prompt: string, system?: string): Promise<string> {
@@ -23,24 +25,34 @@ async function claudeComplete(prompt: string, system: string | undefined, model:
   return block.type === 'text' ? block.text : ''
 }
 
-async function ollamaComplete(
+function ollamaComplete(
   prompt: string,
   system: string | undefined,
   baseUrl: string,
   model: string,
   timeoutSec: number
 ): Promise<string> {
-  const body: Record<string, unknown> = { model, prompt, stream: false }
-  if (system) body.system = system
-  const res = await fetch(`${baseUrl}/api/generate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(timeoutSec * 1000)
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify({ model, prompt, stream: false, ...(system ? { system } : {}) })
+    const url = new URL('/api/generate', baseUrl)
+    const req = (url.protocol === 'https:' ? httpsRequest : httpRequest)(
+      { hostname: url.hostname, port: url.port || (url.protocol === 'https:' ? 443 : 80), path: url.pathname, method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }, timeout: timeoutSec * 1000 },
+      (res) => {
+        const chunks: Buffer[] = []
+        res.on('data', (c: Buffer) => chunks.push(c))
+        res.on('end', () => {
+          try {
+            const data = JSON.parse(Buffer.concat(chunks).toString()) as { response?: string }
+            resolve(data.response || '')
+          } catch (e) { reject(e) }
+        })
+      }
+    )
+    req.on('timeout', () => { req.destroy(); reject(new Error(`Ollama timed out after ${timeoutSec}s`)) })
+    req.on('error', reject)
+    req.write(payload)
+    req.end()
   })
-  if (!res.ok) throw new Error(`Ollama error: HTTP ${res.status}`)
-  const data = (await res.json()) as { response?: string }
-  return data.response || ''
 }
 
 export async function llmJson<T>(prompt: string, system?: string): Promise<T> {
