@@ -38,11 +38,9 @@ async function runProfile(): Promise<void> {
   const filePath = process.argv[3]
   if (filePath) {
     console.log(`Importing CV: ${filePath}`)
-    const { missingFields } = await importCVFile(filePath)
-    if (missingFields.length > 0) {
-      console.log(`\nLLM flagged these fields as missing or unclear: ${missingFields.join(', ')}`)
-    }
-    await runProfileQuiz(true, missingFields)
+    await importCVFile(filePath)
+    console.log('\nReview the extracted values below. Press Enter to accept, or type a correction.\n')
+    await runProfileQuiz(false)
   } else {
     await runProfileQuiz(false) // quiz everything
   }
