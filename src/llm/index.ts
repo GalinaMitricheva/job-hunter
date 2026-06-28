@@ -33,22 +33,48 @@ function ollamaComplete(
   timeoutSec: number
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const payload = JSON.stringify({ model, prompt, stream: false, ...(system ? { system } : {}) })
+    // stream: true keeps the socket alive as tokens arrive, avoiding idle timeouts
+    const payload = JSON.stringify({ model, prompt, stream: true, ...(system ? { system } : {}) })
     const url = new URL('/api/generate', baseUrl)
+    let tokensSeen = 0
+    let result = ''
+
     const req = (url.protocol === 'https:' ? httpsRequest : httpRequest)(
-      { hostname: url.hostname, port: url.port || (url.protocol === 'https:' ? 443 : 80), path: url.pathname, method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }, timeout: timeoutSec * 1000 },
+      {
+        hostname: url.hostname,
+        port: url.port || (url.protocol === 'https:' ? 443 : 80),
+        path: url.pathname,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) },
+        timeout: timeoutSec * 1000
+      },
       (res) => {
-        const chunks: Buffer[] = []
-        res.on('data', (c: Buffer) => chunks.push(c))
-        res.on('end', () => {
-          try {
-            const data = JSON.parse(Buffer.concat(chunks).toString()) as { response?: string }
-            resolve(data.response || '')
-          } catch (e) { reject(e) }
+        let buf = ''
+        res.on('data', (chunk: Buffer) => {
+          buf += chunk.toString()
+          const lines = buf.split('\n')
+          buf = lines.pop() ?? ''
+          for (const line of lines) {
+            if (!line.trim()) continue
+            try {
+              const obj = JSON.parse(line) as { response?: string; done?: boolean }
+              if (obj.response) { result += obj.response; tokensSeen++ }
+              if (obj.done) { resolve(result); return }
+            } catch { /* partial line, ignore */ }
+          }
         })
+        res.on('end', () => resolve(result))
       }
     )
-    req.on('timeout', () => { req.destroy(); reject(new Error(`Ollama timed out after ${timeoutSec}s`)) })
+
+    // socket timeout resets on each received chunk, so streaming prevents it firing mid-generation
+    req.on('timeout', () => {
+      req.destroy()
+      const hint = tokensSeen === 0
+        ? 'Ollama never responded — is it running? Consider a smaller model (e.g. gemma3:1b, qwen2.5:1.5b)'
+        : `Ollama stopped mid-generation after ${tokensSeen} tokens`
+      reject(new Error(hint))
+    })
     req.on('error', reject)
     req.write(payload)
     req.end()
