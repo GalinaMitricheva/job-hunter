@@ -124,30 +124,34 @@ function closeOpenJson(s: string): string {
   const stack: string[] = []
   let inString = false
   let escape = false
-  let lastValueEnd = s.length  // tracks where we can safely truncate to
+  // Last position after a fully-completed property (after ',' or opening '{'/']')
+  // Rolling back here drops the incomplete key:value pair entirely
+  let lastCompleteEnd = 0
 
   for (let i = 0; i < s.length; i++) {
     const ch = s[i]
     if (escape) { escape = false; continue }
     if (ch === '\\' && inString) { escape = true; continue }
-    if (ch === '"') {
-      inString = !inString
-      if (!inString) lastValueEnd = i + 1  // just closed a string — safe point
-      continue
-    }
+    if (ch === '"') { inString = !inString; continue }
     if (inString) continue
-    if (ch === '{' || ch === '[') stack.push(ch === '{' ? '}' : ']')
-    else if (ch === '}' || ch === ']') { stack.pop(); lastValueEnd = i + 1 }
-    else if (ch === ',' || ch === ':') lastValueEnd = i + 1
+    if (ch === '{' || ch === '[') {
+      stack.push(ch === '{' ? '}' : ']')
+      lastCompleteEnd = i + 1  // right after opening bracket is safe
+    } else if (ch === '}' || ch === ']') {
+      stack.pop()
+      lastCompleteEnd = i + 1
+    } else if (ch === ',') {
+      lastCompleteEnd = i + 1  // after comma = previous property fully written
+    }
+    // Intentionally NOT updating on ':' — that would leave "key":} with no value
   }
 
   if (inString) {
-    // Mid-string truncation: close the string then drop the incomplete key/value
-    // by rolling back to the last safe comma or colon boundary
-    s = s.slice(0, lastValueEnd)
+    // Roll back to the last complete property boundary, dropping the truncated one
+    s = s.slice(0, lastCompleteEnd).trimEnd().replace(/,\s*$/, '')
   }
 
-  return s.trimEnd().replace(/,\s*$/, '') + stack.reverse().join('')
+  return s + stack.reverse().join('')
 }
 
 export async function scoreJobRelevance(
