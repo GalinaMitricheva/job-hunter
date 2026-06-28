@@ -1,4 +1,17 @@
 import { readFileSync } from 'fs'
+
+// Coerce any LLM output value to a type SQLite can bind
+function s(v: unknown): string | null {
+  if (v === null || v === undefined || v === '') return null
+  if (typeof v === 'string') return v
+  if (Array.isArray(v)) return v.join('\n')
+  return String(v)
+}
+function n(v: unknown): number {
+  if (typeof v === 'boolean') return v ? 1 : 0
+  const num = Number(v)
+  return isNaN(num) ? 0 : num
+}
 import { extname } from 'path'
 import { getDb } from '../db'
 import { parseProfileFromText } from '../llm'
@@ -70,7 +83,7 @@ function saveProfileToDb(parsed: Record<string, unknown>, rawText: string): void
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     work.forEach((e, i) => {
-      insertExp.run(e.company, e.title, e.location || null, e.start_date || '', e.end_date || null, e.is_current ? 1 : 0, e.description || null, e.achievements || null, i)
+      insertExp.run(s(e.company), s(e.title), s(e.location), s(e.start_date) ?? '', s(e.end_date), n(e.is_current), s(e.description), s(e.achievements), i)
     })
   }
 
@@ -83,7 +96,7 @@ function saveProfileToDb(parsed: Record<string, unknown>, rawText: string): void
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `)
     edu.forEach((e, i) => {
-      insertEdu.run(e.institution, e.degree, e.field_of_study || null, e.graduation_year || null, e.gpa || null, e.honors || null, i)
+      insertEdu.run(s(e.institution), s(e.degree), s(e.field_of_study), s(e.graduation_year), s(e.gpa), s(e.honors), i)
     })
   }
 
@@ -94,8 +107,8 @@ function saveProfileToDb(parsed: Record<string, unknown>, rawText: string): void
     const insertSkill = db.prepare(`
       INSERT INTO skills (name, category, proficiency, sort_order) VALUES (?, ?, ?, ?)
     `)
-    skillsList.forEach((s, i) => {
-      insertSkill.run(s.name, s.category || 'Technical', s.proficiency || 'Intermediate', i)
+    skillsList.forEach((sk, i) => {
+      insertSkill.run(s(sk.name), s(sk.category) ?? 'Technical', s(sk.proficiency) ?? 'Intermediate', i)
     })
   }
 
@@ -103,7 +116,7 @@ function saveProfileToDb(parsed: Record<string, unknown>, rawText: string): void
   if (certs.length > 0) {
     db.prepare('DELETE FROM certifications').run()
     const insertCert = db.prepare(`INSERT INTO certifications (name, issuing_org, year, sort_order) VALUES (?, ?, ?, ?)`)
-    certs.forEach((c, i) => insertCert.run(c.name, c.issuing_org || null, c.year || null, i))
+    certs.forEach((c, i) => insertCert.run(s(c.name), s(c.issuing_org), s(c.year), i))
   }
 
   const titles = (parsed.target_titles as string[]) || []
