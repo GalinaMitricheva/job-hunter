@@ -83,9 +83,51 @@ function ollamaComplete(
 
 export async function llmJson<T>(prompt: string, system?: string): Promise<T> {
   const raw = await llmComplete(prompt, system)
-  const match = raw.match(/\{[\s\S]*\}/)
-  if (!match) throw new Error('No JSON object found in LLM response')
-  return JSON.parse(match[0]) as T
+  return parseJsonFromLlm<T>(raw)
+}
+
+function parseJsonFromLlm<T>(raw: string): T {
+  // Extract the outermost {...} block
+  const start = raw.indexOf('{')
+  const end = raw.lastIndexOf('}')
+  if (start === -1 || end === -1) throw new Error(`No JSON object found in LLM response:\n${raw.slice(0, 200)}`)
+  let candidate = raw.slice(start, end + 1)
+
+  // 1. Try as-is
+  try { return JSON.parse(candidate) as T } catch { /* fall through */ }
+
+  // 2. Strip JS-style comments
+  candidate = candidate.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '')
+
+  // 3. Remove trailing commas before } or ]
+  candidate = candidate.replace(/,(\s*[}\]])/g, '$1')
+
+  // 4. Try again
+  try { return JSON.parse(candidate) as T } catch { /* fall through */ }
+
+  // 5. If still truncated, attempt to close open structures
+  candidate = closeOpenJson(candidate)
+  try { return JSON.parse(candidate) as T } catch (e) {
+    throw new Error(`Could not parse LLM JSON output: ${(e as Error).message}\nRaw excerpt:\n${raw.slice(0, 300)}`)
+  }
+}
+
+function closeOpenJson(s: string): string {
+  const stack: string[] = []
+  let inString = false
+  let escape = false
+  for (const ch of s) {
+    if (escape) { escape = false; continue }
+    if (ch === '\\' && inString) { escape = true; continue }
+    if (ch === '"') { inString = !inString; continue }
+    if (inString) continue
+    if (ch === '{') stack.push('}')
+    else if (ch === '[') stack.push(']')
+    else if (ch === '}' || ch === ']') stack.pop()
+  }
+  // Close any open string first
+  if (inString) s += '"'
+  return s + stack.reverse().join('')
 }
 
 export async function scoreJobRelevance(
