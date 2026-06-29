@@ -247,29 +247,40 @@ Write in first person. No placeholders. 3-4 short paragraphs. Professional but w
 }
 
 export async function parseProfileFromText(cvText: string): Promise<Record<string, unknown>> {
-  return llmJson(
-    `Extract a structured professional profile from this CV text:\n\n${cvText.substring(0, 6000)}`,
-    `You are a CV parser. Extract structured data from CV text.
-Return JSON with this exact shape:
-{
-  "full_name": "string",
-  "email": "string",
-  "phone": "string",
-  "location": "string",
-  "linkedin_url": "string",
-  "website_url": "string",
-  "github_url": "string",
-  "summary": "string",
-  "work_experience": [
-    {"company":"","title":"","location":"","start_date":"","end_date":"","is_current":false,"description":"","achievements":""}
-  ],
-  "education": [
-    {"institution":"","degree":"","field_of_study":"","graduation_year":"","gpa":"","honors":""}
-  ],
-  "skills": [{"name":"","category":"Technical","proficiency":"Intermediate"}],
-  "certifications": [{"name":"","issuing_org":"","year":""}],
-  "target_titles": ["string"],
-  "missing_fields": ["list of fields that seem missing or unclear"]
+  // Split into multiple focused calls so each fits in the model's context window.
+  // A single giant call causes small models (qwen2.5:1.5b etc.) to truncate mid-output.
+  const text = cvText.substring(0, 8000)
+
+  // 1. Personal info + summary
+  const personal = await llmJson<Record<string, unknown>>(
+    `Extract personal contact information and professional summary from this CV:\n\n${text}`,
+    `You are a CV parser. Extract ONLY personal info and summary.
+Return JSON: {"full_name":"","email":"","phone":"","location":"","linkedin_url":"","website_url":"","github_url":"","summary":"","target_titles":[""],"missing_fields":[]}`
+  ).catch(() => ({}))
+
+  // 2. Work experience — ask for ALL entries explicitly
+  const workResult = await llmJson<{ work_experience: Array<Record<string, unknown>> }>(
+    `List ALL work experience entries from this CV. Include every job, even old or short ones.\n\nCV:\n${text}`,
+    `You are a CV parser. Extract ALL work experience entries.
+Return JSON: {"work_experience":[{"company":"","title":"","location":"","start_date":"","end_date":"","is_current":false,"description":"bullet points joined with newlines","achievements":""}]}`
+  ).catch(() => ({ work_experience: [] }))
+
+  // 3. Education, skills, certifications
+  const eduSkills = await llmJson<{ education: Array<Record<string, unknown>>; skills: Array<Record<string, unknown>>; certifications: Array<Record<string, unknown>> }>(
+    `Extract education, skills, and certifications from this CV:\n\n${text}`,
+    `You are a CV parser. Extract education, skills, and certifications.
+Return JSON: {
+  "education":[{"institution":"","degree":"","field_of_study":"","graduation_year":"","gpa":"","honors":""}],
+  "skills":[{"name":"","category":"Technical","proficiency":"Intermediate"}],
+  "certifications":[{"name":"","issuing_org":"","year":""}]
 }`
-  )
+  ).catch(() => ({ education: [], skills: [], certifications: [] }))
+
+  return {
+    ...personal,
+    work_experience: workResult.work_experience || [],
+    education: eduSkills.education || [],
+    skills: eduSkills.skills || [],
+    certifications: eduSkills.certifications || [],
+  }
 }
