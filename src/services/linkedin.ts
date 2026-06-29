@@ -25,7 +25,7 @@ export interface JobListing {
 let browserInstance: Browser | null = null
 
 async function getBrowser(headless: boolean): Promise<Browser> {
-  if (browserInstance) return browserInstance
+  if (browserInstance && browserInstance.isConnected()) return browserInstance
   browserInstance = await chromium.launch({
     headless,
     args: ['--no-sandbox', '--disable-blink-features=AutomationControlled']
@@ -149,5 +149,10 @@ export async function searchLinkedIn(query: string, location: string, headless: 
   const timeout = new Promise<never>((_, reject) =>
     setTimeout(() => reject(new LinkedInError(`LinkedIn search timed out after ${SEARCH_TIMEOUT_MS / 1000}s`, 'timeout')), SEARCH_TIMEOUT_MS)
   )
-  return Promise.race([doLinkedInSearch(query, location, headless), timeout])
+  try {
+    return await Promise.race([doLinkedInSearch(query, location, headless), timeout])
+  } finally {
+    // Always reset the browser after each search so the next query starts clean
+    await closeBrowser()
+  }
 }
