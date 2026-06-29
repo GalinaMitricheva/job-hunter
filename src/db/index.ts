@@ -28,7 +28,8 @@ function runMigrations(db: Database.Database): void {
   const migrations = [
     `ALTER TABLE search_runs ADD COLUMN source_errors TEXT NOT NULL DEFAULT '[]'`,
     `ALTER TABLE profile ADD COLUMN raw_cv_text TEXT`,
-    `ALTER TABLE applications ADD COLUMN manual_steps TEXT`
+    `ALTER TABLE applications ADD COLUMN manual_steps TEXT`,
+    `ALTER TABLE profile ADD COLUMN languages TEXT NOT NULL DEFAULT '[]'`
   ]
   for (const sql of migrations) {
     try { db.exec(sql) } catch { /* column already exists */ }

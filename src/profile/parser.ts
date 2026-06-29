@@ -56,11 +56,12 @@ async function extractDocxText(filePath: string): Promise<string> {
 function saveProfileToDb(parsed: Record<string, unknown>, rawText: string): void {
   const db = getDb()
 
+  const languages = Array.isArray(parsed.languages) ? parsed.languages : []
   db.prepare(`
     UPDATE profile SET
       full_name = ?, email = ?, phone = ?, location = ?,
       linkedin_url = ?, website_url = ?, github_url = ?,
-      summary = ?, raw_cv_text = ?, updated_at = datetime('now')
+      summary = ?, languages = ?, raw_cv_text = ?, updated_at = datetime('now')
     WHERE id = 1
   `).run(
     parsed.full_name || null,
@@ -71,6 +72,7 @@ function saveProfileToDb(parsed: Record<string, unknown>, rawText: string): void
     parsed.website_url || null,
     parsed.github_url || null,
     parsed.summary || null,
+    JSON.stringify(languages),
     rawText
   )
 

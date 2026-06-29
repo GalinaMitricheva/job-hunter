@@ -264,7 +264,7 @@ export async function parseProfileFromText(cvText: string): Promise<Record<strin
   const personal = await llmJson<Record<string, unknown>>(
     `Extract personal contact information and professional summary from this CV:\n\n${text}`,
     `You are a CV parser. Extract ONLY personal info and summary.
-Return JSON: {"full_name":"","email":"","phone":"","location":"","linkedin_url":"","website_url":"","github_url":"","summary":"","target_titles":[""],"missing_fields":[]}`
+Return JSON: {"full_name":"","email":"","phone":"","location":"","linkedin_url":"","website_url":"","github_url":"","summary":"","languages":[{"language":"","proficiency":""}],"target_titles":[""],"missing_fields":[]}`
   ).catch(() => ({}))
 
   // 2. Work experience — ask for ALL entries explicitly
