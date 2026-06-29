@@ -38,8 +38,11 @@ export async function runSearch(): Promise<SearchSummary> {
   let queued = 0
 
   // --- LinkedIn search ---
+  if (!cfg.linkedin.enabled) {
+    console.log('  LinkedIn search disabled (set linkedin.enabled=true in config.json to enable)')
+  }
   const locations = preferredLocations.length > 0 ? preferredLocations : ['Remote']
-  for (const title of targetTitles.slice(0, 3)) {
+  for (const title of cfg.linkedin.enabled ? targetTitles.slice(0, 3) : []) {
     for (const location of locations.slice(0, 2)) {
       try {
         console.log(`  Searching LinkedIn: "${title}" in "${location}"...`)

@@ -17,6 +17,7 @@ export interface AppConfig {
     headlessBrowser: boolean
   }
   linkedin: {
+    enabled: boolean
     email: string
     password: string
   }
