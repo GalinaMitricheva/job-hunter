@@ -159,25 +159,34 @@ export async function scoreJobRelevance(
   jobDescription: string,
   profileSummary: string,
   skills: string[],
-  targetTitles: string[]
-): Promise<{ score: number; reasoning: string }> {
+  targetTitles: string[],
+  workExperience: Array<Record<string, unknown>> = []
+): Promise<{ score: number; reasoning: string; missingRequirements: string[] }> {
+  const expLines = workExperience
+    .slice(0, 5)
+    .map((e) => `- ${e.title} at ${e.company} (${e.start_date}–${e.end_date || 'Present'})`)
+    .join('\n')
   try {
-    return await llmJson<{ score: number; reasoning: string }>(
+    const result = await llmJson<{ score: number; reasoning: string; missingRequirements: string[] }>(
       `Candidate profile:
 - Summary: ${profileSummary || 'Not provided'}
 - Skills: ${skills.join(', ')}
+- Experience:\n${expLines || '(none listed)'}
 - Target roles: ${targetTitles.join(', ')}
 
 Job posting:
 - Title: ${jobTitle}
 - Description: ${jobDescription.substring(0, 2000)}
 
-Rate the match from 0-100 and explain why.`,
-      `You are a job match evaluator. Score how well a job posting matches a candidate's profile.
-Always respond with valid JSON only: {"score": <0-100>, "reasoning": "<1-2 sentences>"}`
+Step 1: List the hard requirements from the job (required skills, years of experience, domain knowledge, must-have tools).
+Step 2: For each hard requirement, check if the candidate clearly has it.
+Step 3: Score 0-100. Start at 100 and deduct heavily for each unmet hard requirement (20-30 pts each). A job with 2+ unmet hard requirements should score below 50.`,
+      `You are a strict job match evaluator. Your job is to protect the candidate from wasting time on roles they are not qualified for.
+Always respond with valid JSON only: {"score":<0-100>,"reasoning":"<2 sentences: what matches and what is missing>","missingRequirements":["<requirement not met>"]}`
     )
+    return { score: result.score, reasoning: result.reasoning, missingRequirements: result.missingRequirements || [] }
   } catch {
-    return { score: 50, reasoning: 'Unable to evaluate' }
+    return { score: 50, reasoning: 'Unable to evaluate', missingRequirements: [] }
   }
 }
 

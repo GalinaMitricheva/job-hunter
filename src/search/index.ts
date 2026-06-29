@@ -87,13 +87,18 @@ export async function runSearch(): Promise<SearchSummary> {
 
   for (const job of newJobs) {
     console.log(`  Scoring: ${job.title} at ${job.company}...`)
-    const { score, reasoning } = await scoreJobRelevance(
+    const { score, reasoning, missingRequirements } = await scoreJobRelevance(
       String(job.title),
       String(job.job_description || ''),
       String(profile.summary || ''),
       skills.map((s) => s.name),
-      targetTitles
+      targetTitles,
+      workExperience
     )
+
+    if (missingRequirements.length > 0) {
+      console.log(`    Missing: ${missingRequirements.join('; ')}`)
+    }
 
     db.prepare(`UPDATE job_results SET relevance_score = ?, relevance_reasoning = ?, status = 'scored' WHERE id = ?`).run(score, reasoning, job.id)
 
