@@ -61,9 +61,14 @@ export async function runSearch(): Promise<SearchSummary> {
   // --- Company career pages ---
   const includeKeywords: string[] = JSON.parse(String(prefs.include_keywords || '[]'))
   for (const url of cfg.search.companyUrls) {
+    console.log(`  Scraping ${url}...`)
     try {
-      console.log(`  Scraping ${url}...`)
-      const jobs = await scrapeCompanyCareerPage(url, [...targetTitles, ...includeKeywords], cfg.search.headlessBrowser)
+      const scrapeWithTimeout = Promise.race([
+        scrapeCompanyCareerPage(url, [...targetTitles, ...includeKeywords], cfg.search.headlessBrowser),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timed out after 60s')), 60_000))
+      ])
+      const jobs = await scrapeWithTimeout
+      console.log(`    → ${jobs.length} job(s) found`)
       totalFound += jobs.length
       for (const job of jobs) {
         if (excludeCompanies.some((c) => job.company.toLowerCase().includes(c.toLowerCase()))) continue
@@ -71,7 +76,9 @@ export async function runSearch(): Promise<SearchSummary> {
         if (inserted) newResults++
       }
     } catch (err) {
-      errors.push(`Company scrape error (${url}): ${String(err)}`)
+      const msg = `Scrape failed (${url}): ${String(err)}`
+      errors.push(msg)
+      console.warn(`    → ${msg}`)
     }
   }
 
