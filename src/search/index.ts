@@ -16,7 +16,7 @@ export async function runSearch(): Promise<SearchSummary> {
   const db = getDb()
   const cfg = getConfig()
 
-  const profile = db.prepare('SELECT * FROM profile WHERE id = 1').get() as Record<string, unknown>
+  const profile = db.prepare('SELECT * FROM profile WHERE id = 1').get() as Record<string, unknown> & { languages?: string }
   const prefs = db.prepare('SELECT * FROM job_preferences WHERE id = 1').get() as Record<string, unknown>
   const workExperience = db.prepare('SELECT * FROM work_experience ORDER BY sort_order').all() as Array<Record<string, unknown>>
   const education = db.prepare('SELECT * FROM education ORDER BY sort_order').all() as Array<Record<string, unknown>>
@@ -87,13 +87,15 @@ export async function runSearch(): Promise<SearchSummary> {
 
   for (const job of newJobs) {
     console.log(`  Scoring: ${job.title} at ${job.company}...`)
+    const languages: Array<{ language: string; proficiency: string }> = JSON.parse(profile.languages || '[]')
     const { score, reasoning, missingRequirements } = await scoreJobRelevance(
       String(job.title),
       String(job.job_description || ''),
       String(profile.summary || ''),
       skills.map((s) => s.name),
       targetTitles,
-      workExperience
+      workExperience,
+      languages
     )
 
     if (missingRequirements.length > 0) {

@@ -160,17 +160,22 @@ export async function scoreJobRelevance(
   profileSummary: string,
   skills: string[],
   targetTitles: string[],
-  workExperience: Array<Record<string, unknown>> = []
+  workExperience: Array<Record<string, unknown>> = [],
+  languages: Array<{ language: string; proficiency: string }> = []
 ): Promise<{ score: number; reasoning: string; missingRequirements: string[] }> {
   const expLines = workExperience
     .slice(0, 5)
     .map((e) => `- ${e.title} at ${e.company} (${e.start_date}–${e.end_date || 'Present'})`)
     .join('\n')
+  const langLine = languages.length > 0
+    ? languages.map((l) => `${l.language} (${l.proficiency})`).join(', ')
+    : 'Not specified'
   try {
     const result = await llmJson<{ score: number; reasoning: string; missingRequirements: string[] }>(
       `Candidate profile:
 - Summary: ${profileSummary || 'Not provided'}
 - Skills: ${skills.join(', ')}
+- Languages: ${langLine}
 - Experience:\n${expLines || '(none listed)'}
 - Target roles: ${targetTitles.join(', ')}
 
@@ -178,8 +183,8 @@ Job posting:
 - Title: ${jobTitle}
 - Description: ${jobDescription.substring(0, 2000)}
 
-Step 1: List the hard requirements from the job (required skills, years of experience, domain knowledge, must-have tools).
-Step 2: For each hard requirement, check if the candidate clearly has it.
+Step 1: List the hard requirements from the job (required skills, years of experience, domain knowledge, must-have tools, required languages).
+Step 2: For each hard requirement, check if the candidate clearly has it. Treat language requirements as hard requirements.
 Step 3: Score 0-100. Start at 100 and deduct heavily for each unmet hard requirement (20-30 pts each). A job with 2+ unmet hard requirements should score below 50.`,
       `You are a strict job match evaluator. Your job is to protect the candidate from wasting time on roles they are not qualified for.
 Always respond with valid JSON only: {"score":<0-100>,"reasoning":"<2 sentences: what matches and what is missing>","missingRequirements":["<requirement not met>"]}`
