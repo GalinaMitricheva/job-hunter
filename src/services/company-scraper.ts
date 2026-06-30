@@ -72,9 +72,11 @@ function looksLikeJobUrl(href: string): boolean {
 }
 
 function looksLikeJobPosting(text: string, title: string): boolean {
+  // Reject obvious non-job page titles up front
+  if (/^(blog|home|search jobs|jobs?$|engineering$|careers?$|spotlight|rovo|newsletter|about|news|press|analyst|leadership|products?$|platform$|security$|pricing$)/i.test(title.trim())) return false
   const lower = (text + ' ' + title).toLowerCase()
   // Must have at least two of these markers to be treated as a real job posting
-  const markers = ['responsibilit', 'requirement', 'qualif', 'apply', 'we are looking', 'you will', 'your role', 'what you', 'job description', 'about the role']
+  const markers = ['responsibilit', 'requirement', 'qualif', 'apply', 'we are looking', 'you will', 'your role', 'what you', 'job description', 'about the role', "we're looking", 'the opportunity', 'who you are']
   return markers.filter((m) => lower.includes(m)).length >= 2
 }
 
