@@ -117,12 +117,39 @@ export async function runSearch(): Promise<SearchSummary> {
 
   const TOO_JUNIOR = /\b(intern|internship|entry.?level|junior|graduate|trainee|apprentice|student)\b/i
   const languages: Array<{ language: string; proficiency: string }> = JSON.parse(profile.languages || '[]')
+  const locationType = String(prefs.location_type || 'Remote, hybrid').toLowerCase()
+  const acceptsRemote = locationType.includes('remote')
+  const acceptsHybrid = locationType.includes('hybrid')
+  // Candidate is based in Munich — on-site roles must be there
+  const homeCity = String(profile.location || '').toLowerCase().split(',')[0].trim() // "munich"
+
+  function locationAccepted(jobLocationRaw: string, descriptionRaw: string): boolean {
+    const loc = jobLocationRaw.toLowerCase()
+    const desc = descriptionRaw.toLowerCase().substring(0, 2000)
+    const combined = loc + ' ' + desc
+    // Explicit remote/hybrid anywhere in location or first part of description
+    if (acceptsRemote && /\bremote\b/.test(combined)) return true
+    if (acceptsHybrid && /\bhybrid\b/.test(combined)) return true
+    // On-site in the candidate's city
+    if (homeCity && combined.includes(homeCity)) return true
+    // Blank location — can't rule out; let LLM decide
+    if (!jobLocationRaw.trim()) return true
+    return false
+  }
 
   for (const job of newJobs) {
     const titleStr = String(job.title)
     if (TOO_JUNIOR.test(titleStr)) {
       console.log(`  Skipping (too junior): ${titleStr} at ${job.company}`)
       db.prepare(`UPDATE job_results SET relevance_score = 0, relevance_reasoning = 'Role is below candidate seniority level', status = 'scored' WHERE id = ?`).run(job.id)
+      continue
+    }
+
+    const jobLocation = String(job.location || '')
+    const jobDesc = String(job.job_description || '')
+    if (!locationAccepted(jobLocation, jobDesc)) {
+      console.log(`  Skipping (location mismatch): ${titleStr} at ${job.company} [${jobLocation || 'no location'}]`)
+      db.prepare(`UPDATE job_results SET relevance_score = 0, relevance_reasoning = 'Location does not match candidate preferences (remote/hybrid/Munich)', status = 'scored' WHERE id = ?`).run(job.id)
       continue
     }
 
@@ -134,7 +161,9 @@ export async function runSearch(): Promise<SearchSummary> {
       skills.map((s) => s.name),
       targetTitles,
       workExperience,
-      languages
+      languages,
+      String(prefs.location_type || 'Remote, hybrid'),
+      homeCity || 'Munich'
     )
 
 

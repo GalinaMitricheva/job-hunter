@@ -161,7 +161,9 @@ export async function scoreJobRelevance(
   skills: string[],
   targetTitles: string[],
   workExperience: Array<Record<string, unknown>> = [],
-  languages: Array<{ language: string; proficiency: string }> = []
+  languages: Array<{ language: string; proficiency: string }> = [],
+  locationPreference: string = 'Remote, hybrid',
+  candidateCity: string = 'Munich'
 ): Promise<{ score: number; reasoning: string; missingRequirements: string[] }> {
   const expLines = workExperience
     .slice(0, 5)
@@ -183,13 +185,14 @@ export async function scoreJobRelevance(
 - Languages: ${langLine}
 - Experience:\n${expLines || '(none listed)'}
 - Target roles: ${targetTitles.join(', ')}
+- Location preference: ${locationPreference}; based in ${candidateCity}
 
 Job posting:
 - Title: ${jobTitle}
 - Description: ${jobDescription.substring(0, 2000)}
 
-Step 1: List the hard requirements stated in the job description (required skills, years of experience, domain knowledge, must-have tools, required languages).
-Step 2: For each hard requirement, decide: does the candidate profile above clearly satisfy it? If yes, skip it. If no, it is a gap.
+Step 1: List the hard requirements stated in the job description (required skills, years of experience, domain knowledge, must-have tools, required languages, work location).
+Step 2: For each hard requirement, decide: does the candidate profile above clearly satisfy it? If yes, skip it. If no, it is a gap. Treat an on-site-only requirement outside ${candidateCity} as a location gap.
 Step 3: Score 0-100. Start at 100 and deduct 20-30 pts for each gap. A job with 2+ gaps should score below 50.
 missingRequirements must list ONLY things the job explicitly requires that the candidate does NOT have. Never list things the candidate has.`,
       `You are a strict job match evaluator. Protect the candidate from wasting time on roles they cannot do.
