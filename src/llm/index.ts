@@ -171,6 +171,11 @@ export async function scoreJobRelevance(
     ? languages.map((l) => `${l.language} (${l.proficiency})`).join(', ')
     : 'Not specified'
   try {
+    const skillSet = new Set(skills.map((s) => s.toLowerCase()))
+    const hasSkill = (req: string) =>
+      skillSet.has(req.toLowerCase()) ||
+      skills.some((s) => req.toLowerCase().includes(s.toLowerCase()) || s.toLowerCase().includes(req.toLowerCase()))
+
     const result = await llmJson<{ score: number; reasoning: string; missingRequirements: string[] }>(
       `Candidate profile:
 - Summary: ${profileSummary || 'Not provided'}
@@ -190,7 +195,8 @@ missingRequirements must list ONLY things the job explicitly requires that the c
       `You are a strict job match evaluator. Protect the candidate from wasting time on roles they cannot do.
 Respond with valid JSON only: {"score":<0-100>,"reasoning":"<2 sentences: what fits and what gaps exist>","missingRequirements":["<job requirement the candidate lacks>"]}`
     )
-    return { score: result.score, reasoning: result.reasoning, missingRequirements: result.missingRequirements || [] }
+    const verified = (result.missingRequirements || []).filter((req) => !hasSkill(req))
+    return { score: result.score, reasoning: result.reasoning, missingRequirements: verified }
   } catch {
     return { score: 50, reasoning: 'Unable to evaluate', missingRequirements: [] }
   }
