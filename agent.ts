@@ -79,7 +79,7 @@ function runStartCmd(): void {
 }
 
 async function runEvalCmd(): Promise<void> {
-  const { exportEvalData } = await import('./src/eval/index')
+  const { exportEvalData } = await import('./src/eval/index.ts')
   const args = process.argv.slice(3)
   const countIdx = args.indexOf('--count')
   const count = countIdx !== -1 ? parseInt(args[countIdx + 1], 10) : 50
