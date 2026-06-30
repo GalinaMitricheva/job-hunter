@@ -15,6 +15,11 @@ export interface AppConfig {
     fitScoreThreshold: number
     companyUrls: string[]
     headlessBrowser: boolean
+    jobBoards: {
+      enabled: boolean
+      sites: string[]   // "indeed" | "stepstone"
+      locations: string[]
+    }
   }
   linkedin: {
     enabled: boolean

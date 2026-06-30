@@ -3,6 +3,7 @@ import { getConfig } from '../config'
 import { scoreJobRelevance, tailorCV, generateCoverLetter } from '../llm'
 import { searchLinkedIn, LinkedInError } from '../services/linkedin'
 import { scrapeCompanyCareerPage } from '../services/company-scraper'
+import { searchJobBoards } from '../services/job-boards'
 import { generateCVPdf, CVData } from '../services/cv-generator'
 
 interface SearchSummary {
@@ -83,6 +84,32 @@ export async function runSearch(): Promise<SearchSummary> {
       errors.push(msg)
       console.warn(`    → ${msg}`)
     }
+  }
+
+  // --- Job board search ---
+  const jbCfg = cfg.search.jobBoards
+  if (jbCfg?.enabled) {
+    console.log(`  Searching job boards: ${jbCfg.sites.join(', ')}...`)
+    try {
+      const boardJobs = await searchJobBoards(
+        targetTitles,
+        jbCfg.locations.length > 0 ? jbCfg.locations : ['Munich', 'Remote'],
+        jbCfg.sites,
+        cfg.search.headlessBrowser
+      )
+      totalFound += boardJobs.length
+      for (const job of boardJobs) {
+        if (excludeCompanies.some((c) => job.company.toLowerCase().includes(c.toLowerCase()))) continue
+        const inserted = tryInsertJob(db, runId, 'jobboard', job)
+        if (inserted) newResults++
+      }
+    } catch (err) {
+      const msg = `Job board search failed: ${String(err)}`
+      errors.push(msg)
+      console.warn(`    → ${msg}`)
+    }
+  } else {
+    console.log('  Job board search disabled (set search.jobBoards.enabled=true in config.json to enable)')
   }
 
   // --- Score and queue new results ---

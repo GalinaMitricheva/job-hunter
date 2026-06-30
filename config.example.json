@@ -11,7 +11,12 @@
     "schedule": "0 8 * * *",
     "fitScoreThreshold": 70,
     "companyUrls": [],
-    "headlessBrowser": true
+    "headlessBrowser": true,
+    "jobBoards": {
+      "enabled": true,
+      "sites": ["indeed", "stepstone"],
+      "locations": ["Munich", "Remote"]
+    }
   },
   "linkedin": {
     "enabled": false,
