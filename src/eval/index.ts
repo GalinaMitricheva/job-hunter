@@ -1,6 +1,7 @@
 import { writeFileSync } from 'fs'
 import { join } from 'path'
 import { getDb } from '../db'
+import { getConfig } from '../config'
 
 export interface EvalJob {
   id: number
@@ -68,7 +69,7 @@ export function exportEvalData(count: number, outputPath?: string): string {
       languages: JSON.parse(String(profile.languages || '[]')),
       location_type: String(prefs.location_type || 'Remote, hybrid'),
       target_titles: JSON.parse(String(prefs.target_titles || '[]')),
-      fit_score_threshold: Number(prefs.relevance_threshold || 70),
+      fit_score_threshold: getConfig().search.fitScoreThreshold,
       skills,
       work_experience: work as EvalProfile['work_experience'],
       education: education as EvalProfile['education'],
