@@ -7,6 +7,7 @@
  *   search          Run a job search session right now
  *   review          Start the review UI at localhost:3000
  *   start           Start scheduler + review UI together (normal daily use)
+ *   eval [--count N] [--out file]  Export scored jobs for Claude-as-judge eval
  */
 
 const command = process.argv[2]
@@ -24,6 +25,9 @@ async function main(): Promise<void> {
       break
     case 'start':
       runStartCmd()
+      break
+    case 'eval':
+      await runEvalCmd()
       break
     default:
       printHelp()
@@ -74,6 +78,27 @@ function runStartCmd(): void {
   console.log('Agent running. Press Ctrl+C to stop.')
 }
 
+async function runEvalCmd(): Promise<void> {
+  const { exportEvalData } = await import('./src/eval')
+  const args = process.argv.slice(3)
+  const countIdx = args.indexOf('--count')
+  const count = countIdx !== -1 ? parseInt(args[countIdx + 1], 10) : 50
+  const outIdx = args.indexOf('--out')
+  const outPath = outIdx !== -1 ? args[outIdx + 1] : undefined
+
+  const filePath = exportEvalData(isNaN(count) ? 50 : count, outPath)
+  const data = JSON.parse(require('fs').readFileSync(filePath, 'utf-8'))
+
+  console.log(`\nEval data exported to: ${filePath}`)
+  console.log(`  Jobs exported: ${data.jobs.length}`)
+  console.log(`  Threshold:     ${data.profile.fit_score_threshold}`)
+  console.log(`  Passed by agent (score >= threshold): ${data.jobs.filter((j: { agent_score: number }) => j.agent_score >= data.profile.fit_score_threshold).length}`)
+  console.log(`  Filtered by agent (score < threshold): ${data.jobs.filter((j: { agent_score: number }) => j.agent_score < data.profile.fit_score_threshold).length}`)
+  console.log(`\nTo run the eval, open your Claude Code session and say:`)
+  console.log(`  "Run the eval on eval-input.json"`)
+  process.exit(0)
+}
+
 function getReviewPort(): number {
   try {
     const { getConfig } = require('./src/config')
@@ -94,6 +119,8 @@ Commands:
   search           Run a job search session immediately.
   review           Start the review UI at http://localhost:3000.
   start            Start the scheduler + review UI (normal daily use).
+  eval             Export scored jobs for Claude-as-judge evaluation.
+                   Options: --count N (default 50), --out path/to/file.json
 
 Examples:
   node agent.ts profile my-cv.pdf

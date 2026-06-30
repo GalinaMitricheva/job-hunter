@@ -8,3 +8,4 @@ Thumbs.db
 *.log
 data/
 config.json
+eval-input.json
