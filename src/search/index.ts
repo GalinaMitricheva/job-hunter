@@ -88,9 +88,18 @@ export async function runSearch(): Promise<SearchSummary> {
   // --- Score and queue new results ---
   const newJobs = db.prepare(`SELECT * FROM job_results WHERE search_run_id = ? AND status = 'new'`).all(runId) as Array<Record<string, unknown>>
 
+  const TOO_JUNIOR = /\b(intern|internship|entry.?level|junior|graduate|trainee|apprentice|student)\b/i
+  const languages: Array<{ language: string; proficiency: string }> = JSON.parse(profile.languages || '[]')
+
   for (const job of newJobs) {
-    console.log(`  Scoring: ${job.title} at ${job.company}...`)
-    const languages: Array<{ language: string; proficiency: string }> = JSON.parse(profile.languages || '[]')
+    const titleStr = String(job.title)
+    if (TOO_JUNIOR.test(titleStr)) {
+      console.log(`  Skipping (too junior): ${titleStr} at ${job.company}`)
+      db.prepare(`UPDATE job_results SET relevance_score = 0, relevance_reasoning = 'Role is below candidate seniority level', status = 'scored' WHERE id = ?`).run(job.id)
+      continue
+    }
+
+    console.log(`  Scoring: ${titleStr} at ${job.company}...`)
     const { score, reasoning, missingRequirements } = await scoreJobRelevance(
       String(job.title),
       String(job.job_description || ''),
@@ -100,6 +109,7 @@ export async function runSearch(): Promise<SearchSummary> {
       workExperience,
       languages
     )
+
 
     if (missingRequirements.length > 0) {
       console.log(`    Missing: ${missingRequirements.join('; ')}`)

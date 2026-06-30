@@ -183,11 +183,12 @@ Job posting:
 - Title: ${jobTitle}
 - Description: ${jobDescription.substring(0, 2000)}
 
-Step 1: List the hard requirements from the job (required skills, years of experience, domain knowledge, must-have tools, required languages).
-Step 2: For each hard requirement, check if the candidate clearly has it. Treat language requirements as hard requirements.
-Step 3: Score 0-100. Start at 100 and deduct heavily for each unmet hard requirement (20-30 pts each). A job with 2+ unmet hard requirements should score below 50.`,
-      `You are a strict job match evaluator. Your job is to protect the candidate from wasting time on roles they are not qualified for.
-Always respond with valid JSON only: {"score":<0-100>,"reasoning":"<2 sentences: what matches and what is missing>","missingRequirements":["<requirement not met>"]}`
+Step 1: List the hard requirements stated in the job description (required skills, years of experience, domain knowledge, must-have tools, required languages).
+Step 2: For each hard requirement, decide: does the candidate profile above clearly satisfy it? If yes, skip it. If no, it is a gap.
+Step 3: Score 0-100. Start at 100 and deduct 20-30 pts for each gap. A job with 2+ gaps should score below 50.
+missingRequirements must list ONLY things the job explicitly requires that the candidate does NOT have. Never list things the candidate has.`,
+      `You are a strict job match evaluator. Protect the candidate from wasting time on roles they cannot do.
+Respond with valid JSON only: {"score":<0-100>,"reasoning":"<2 sentences: what fits and what gaps exist>","missingRequirements":["<job requirement the candidate lacks>"]}`
     )
     return { score: result.score, reasoning: result.reasoning, missingRequirements: result.missingRequirements || [] }
   } catch {
