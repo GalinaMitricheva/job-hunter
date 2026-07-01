@@ -68,11 +68,11 @@ export async function runSearch(): Promise<SearchSummary> {
   for (const url of cfg.search.companyUrls) {
     console.log(`  Scraping ${url}...`)
     try {
-      const scrapeWithTimeout = Promise.race([
-        scrapeCompanyCareerPage(url, [...targetTitles, ...includeKeywords], cfg.search.headlessBrowser),
-        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timed out after 60s')), 60_000))
-      ])
-      const jobs = await scrapeWithTimeout
+      const abort = new AbortController()
+      const timeoutId = setTimeout(() => abort.abort(), 60_000)
+      const jobs = await scrapeCompanyCareerPage(url, [...targetTitles, ...includeKeywords], cfg.search.headlessBrowser, abort.signal)
+        .finally(() => clearTimeout(timeoutId))
+      if (abort.signal.aborted) throw new Error('Timed out after 60s — browser closed')
       console.log(`    → ${jobs.length} job(s) found`)
       totalFound += jobs.length
       for (const job of jobs) {

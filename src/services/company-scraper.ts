@@ -83,9 +83,14 @@ function looksLikeJobPosting(text: string, title: string): boolean {
 export async function scrapeCompanyCareerPage(
   careerPageUrl: string,
   keywords: string[],
-  headless: boolean
+  headless: boolean,
+  signal?: AbortSignal
 ): Promise<ScrapedJob[]> {
   const browser = await chromium.launch({ headless, args: ['--no-sandbox'] })
+  // Close the browser immediately if the caller has already aborted
+  signal?.addEventListener('abort', () => { browser.close().catch(() => {}) })
+  if (signal?.aborted) { await browser.close(); return [] }
+
   const context = await browser.newContext({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' })
   const page = await context.newPage()
   const results: ScrapedJob[] = []
