@@ -96,6 +96,8 @@ npx tsx agent.ts <command>
 | `search` | Run a job search session right now |
 | `review` | Start the review UI at `http://localhost:3000` |
 | `start` | Start scheduler + review UI together (normal daily use) |
+| `eval` | Export last N scored jobs to `eval-input.json` for LLM-as-judge review |
+| `eval --golden` | Run pre-filter accuracy check against the built-in 100-job golden dataset |
 
 ### First-time setup
 
@@ -122,6 +124,39 @@ Leave this running. The agent searches on the schedule in `config.json` (default
 ```bash
 npx tsx agent.ts search
 ```
+
+---
+
+## Eval Pipeline
+
+The eval pipeline helps you measure and improve the agent's filtering accuracy over time.
+
+### Export latest scored jobs for LLM review
+
+```bash
+npx tsx agent.ts eval [--count 50] [--out path/to/file.json]
+```
+
+Exports the last N scored jobs from the database to `eval-input.json`, including the agent's score, reasoning, and your full profile. Open a Claude Code session and say "Run the eval on eval-input.json" — Claude reads each job description and judges whether the agent's score was correct relative to your profile and the threshold in `config.json`.
+
+### Golden dataset (constant benchmark)
+
+```bash
+npx tsx agent.ts eval --golden
+```
+
+Runs all four pre-filters (not-a-job, wrong-function, too-junior, location) against a committed 100-job dataset (`eval-golden.json`). Each entry has a `ground_truth` label. The command prints a per-filter accuracy report and writes full results to `eval-golden-results.json`.
+
+The golden dataset covers:
+- **Clear positives** — senior PM roles in Munich or EU-remote (15 entries)
+- **Wrong function** — engineering, sales/BD/CSM, finance, legal roles (28 entries)
+- **Wrong location** — US-only or APAC roles (14 entries)
+- **Too junior** — intern, APM, graduate, entry-level (9 entries)
+- **Not a job posting** — blog posts, culture pages, product pages (6 entries)
+- **Borderline** — program managers, product ops, chief of staff (16 entries, some should pass, some shouldn't)
+- **Real failures** — 20 entries from an actual production search, including the worst false positives
+
+Use `--golden` after changing the pre-filter regexes in `src/search/filters.ts` to verify you haven't broken anything.
 
 ---
 

@@ -2,7 +2,7 @@ import Database from 'better-sqlite3'
 import { join } from 'path'
 import { homedir } from 'os'
 import { mkdirSync } from 'fs'
-import { SCHEMA_SQL } from './schema'
+import { SCHEMA_SQL } from './schema.ts'
 
 let db: Database.Database | null = null
 

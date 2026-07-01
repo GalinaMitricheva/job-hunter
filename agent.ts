@@ -79,12 +79,22 @@ function runStartCmd(): void {
 }
 
 async function runEvalCmd(): Promise<void> {
-  const { exportEvalData } = await import('./src/eval/index.ts')
+  const { exportEvalData, evaluateGoldenFilters } = await import('./src/eval/index.ts')
   const args = process.argv.slice(3)
-  const countIdx = args.indexOf('--count')
-  const count = countIdx !== -1 ? parseInt(args[countIdx + 1], 10) : 50
   const outIdx = args.indexOf('--out')
   const outPath = outIdx !== -1 ? args[outIdx + 1] : undefined
+
+  if (args.includes('--golden')) {
+    const { filePath, report } = evaluateGoldenFilters(outPath)
+    console.log(`\n${report}`)
+    console.log(`\nFull results written to: ${filePath}`)
+    console.log(`\nTo evaluate LLM scoring on golden entries that pass filters, open your Claude Code session and say:`)
+    console.log(`  "Run golden LLM eval on eval-golden-results.json"`)
+    process.exit(0)
+  }
+
+  const countIdx = args.indexOf('--count')
+  const count = countIdx !== -1 ? parseInt(args[countIdx + 1], 10) : 50
 
   const filePath = exportEvalData(isNaN(count) ? 50 : count, outPath)
   const data = JSON.parse(require('fs').readFileSync(filePath, 'utf-8'))
@@ -121,6 +131,7 @@ Commands:
   start            Start the scheduler + review UI (normal daily use).
   eval             Export scored jobs for Claude-as-judge evaluation.
                    Options: --count N (default 50), --out path/to/file.json
+           --golden  Run pre-filter accuracy check against the 100-job golden dataset.
 
 Examples:
   node agent.ts profile my-cv.pdf

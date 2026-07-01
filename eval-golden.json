@@ -1,0 +1,1407 @@
+{
+  "version": 1,
+  "description": "Golden eval dataset — 100 representative job postings for consistent benchmarking. Covers true positives, wrong function, wrong location, too-junior, not-a-job, and borderline cases. Real failures from production eval are marked source=real.",
+  "profile_snapshot": "Senior PM 15+ yrs, Munich, B2C + developer tools, remote/hybrid EU",
+  "jobs": [
+    {
+      "id": "golden-001",
+      "source": "real",
+      "title": "Rovo Dev",
+      "company": "atlassian",
+      "location": "",
+      "job_description": "AI-powered. Developer-led. Rovo Dev reduces friction across the entire software delivery lifecycle. Available in your terminal, IDE, and beyond. Try it now. Rovo Dev is Atlassian's AI-powered developer tool that helps engineers write, review, and ship code faster. It integrates with your existing workflow and understands your codebase. Sign up for early access today.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "not-a-job",
+        "category": "not-a-job",
+        "notes": "Product marketing page, not a job listing. Agent scored 86 — major false positive."
+      }
+    },
+    {
+      "id": "golden-002",
+      "source": "real",
+      "title": "Engineering careers",
+      "company": "atlassian",
+      "location": "",
+      "job_description": "Careers. Browse Jobs. Our Teams. Engineering. AI and Machine Learning. Sales. All Teams. Early Careers. Team Experience. Team Anywhere. Team Everyone. Employee Awards. Candidate Resources. Tips for Applying. Interviewing. Career Growth. Benefits and Perks. Talent Community. Awards. Join the Atlassian team and help build products used by millions of developers worldwide.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "not-a-job",
+        "category": "not-a-job",
+        "notes": "Navigation/careers landing page, not a specific job. Agent scored 64."
+      }
+    },
+    {
+      "id": "golden-003",
+      "source": "real",
+      "title": "Job Application for Engineering Manager",
+      "company": "sourcegraph",
+      "location": "",
+      "job_description": "Engineering Manager - Code Plane [M3] Remote. Who we are: Everything is changing in how software gets built, and Sourcegraph is at the center of that transformation. With Code Search, Deep Search, and MCP, Sourcegraph is the world's most powerful code intelligence platform. Teams at Stripe, Uber, and Dropbox rely on Sourcegraph. We're backed by a16z, Sequoia, and Redpoint. Working hours must overlap with EST for at least 20 hours/week. Preferred locations: North America (EST), Europe, South America. Why this job is exciting: You will manage a team of 6-8 engineers working on our core code intelligence plane. You will set technical direction, run hiring loops, conduct performance reviews, and partner with product managers. Requirements: 3+ years engineering management experience, strong technical background in distributed systems, proven track record of growing engineers. You will own team health, delivery, and cross-functional alignment.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-engineering",
+        "notes": "Engineering Manager role — engineering, not PM. Agent scored 85."
+      }
+    },
+    {
+      "id": "golden-004",
+      "source": "real",
+      "title": "Job Application for Security Engineer [IC3] at Sourcegraph",
+      "company": "sourcegraph",
+      "location": "",
+      "job_description": "Security Engineer [IC3] Remote. Who we are: Sourcegraph is the world's most powerful code intelligence platform. Why this job is exciting: As a Security Engineer, you will design and implement security controls across our cloud infrastructure, conduct threat modeling, perform security reviews of new features, respond to security incidents, and build tooling to detect and prevent vulnerabilities. You will work with engineering teams to embed security into the SDLC. Requirements: 3+ years security engineering experience, proficiency in Go or Python, experience with cloud security (AWS/GCP), knowledge of OWASP, threat modeling, penetration testing. Preferred locations: Europe.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-engineering",
+        "notes": "Security Engineer — engineering, not PM. Agent scored 75."
+      }
+    },
+    {
+      "id": "golden-005",
+      "source": "real",
+      "title": "Job Application for Regional Sales Director [M4] at Sourcegraph",
+      "company": "sourcegraph",
+      "location": "",
+      "job_description": "Regional Sales Director [M4] Remote. Who we are: Sourcegraph is the world's most powerful code intelligence platform. Why this job is exciting: As a Regional Sales Director, you will own a territory of enterprise accounts across North America, build and manage a team of Account Executives, develop regional go-to-market strategies, and drive revenue growth. You will partner with marketing, solutions engineering, and customer success. Requirements: Must reside in the United States. 5+ years enterprise software sales, 2+ years sales management, track record of exceeding quota, experience selling to engineering or DevOps teams.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-sales",
+        "notes": "Sales Director — wrong function AND requires US residency. Agent scored high."
+      }
+    },
+    {
+      "id": "golden-006",
+      "source": "real",
+      "title": "Job Application for Distribution Partner Manager at Figma",
+      "company": "figma",
+      "location": "",
+      "job_description": "Distribution Partner Manager. San Francisco, CA • New York, NY • United States. Figma's distribution partnerships team is passionate about unlocking new sources of revenue through strategic alliances. We are looking for an experienced business development and partnerships professional to scale our efforts with agencies, systems integrators, consultancies, and commercial partners across the globe. This includes driving revenue growth and supporting customers across North America. Requirements: 7+ years in partnerships or business development, experience working with channel partners or resellers, strong commercial acumen, ability to travel frequently across North America. Based in SF or NYC required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "US-only (SF/NY), business development role. Agent scored 80."
+      }
+    },
+    {
+      "id": "golden-007",
+      "source": "real",
+      "title": "Job Application for Distribution Partner Manager (Singapore) at Figma",
+      "company": "figma",
+      "location": "",
+      "job_description": "Distribution Partner Manager (Singapore). Singapore. Figma's distribution partnerships team is focused on unlocking new sources of revenue through strategic alliances. We are looking for an experienced business development and partnerships professional to scale our efforts with agencies, systems integrators, consultancies, and commercial partners across APAC. This includes driving revenue growth and supporting customers in India, SE Asia, South Korea, and ANZ. Requirements: 7+ years in partnerships or business development in APAC, fluency in English required, additional Asian language a plus, based in Singapore required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "Singapore location. Agent scored 97 — worst false positive in dataset."
+      }
+    },
+    {
+      "id": "golden-008",
+      "source": "real",
+      "title": "Job Application for Product Partner Manager at Figma",
+      "company": "figma",
+      "location": "",
+      "job_description": "Product Partner Manager. San Francisco, CA • New York, NY • United States. Figma's Business Development & Partnerships team accelerates company goals by working with partners to enhance product experiences, expand our ecosystem, and drive user and revenue growth. As our product portfolio and user base continue to evolve, the team plays a critical role connecting our platform to a broader network of builders, developers, and solution partners. We're looking for someone to build the partnerships foundation for our newest product surfaces. Requirements: Based in SF or NYC. 5+ years in partnerships, strong product intuition, experience with API ecosystems.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "US-only (SF/NY). Partnership role, not PM. Agent scored high."
+      }
+    },
+    {
+      "id": "golden-009",
+      "source": "real",
+      "title": "Job Application for Director, Monetization Strategy at Figma",
+      "company": "figma",
+      "location": "",
+      "job_description": "Director, Monetization Strategy. San Francisco, CA • New York, NY • United States. Monetization strategy has become one of the most important areas of our business. As Director, Monetization Strategy on our Business Operations team, you'll set and drive Figma's monetization strategy across pricing, packaging, our AI credit model, and the evolution of our business model. You'll lead a small, high-leverage team and quarterback decisions reaching the CFO, CPO, and CEO. This is a role for a broad, strategic operator. Requirements: Based in SF or NYC. 10+ years in strategy or business operations, strong financial modeling, experience at a high-growth SaaS company.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "US-only (SF/NY). Strategy/BizOps, not PM. High scorer due to product context."
+      }
+    },
+    {
+      "id": "golden-010",
+      "source": "real",
+      "title": "Job Application for Governance Risk and Compliance at Figma",
+      "company": "figma",
+      "location": "",
+      "job_description": "Governance Risk and Compliance. San Francisco, CA • New York, NY • United States. Figma's GRC team helps build and maintain trust with users, regulators, and business partners. We partner across the company to strengthen security, manage risk, maintain compliance, and scale programs that support continued growth. We're growing our team and looking for security, risk, and compliance professionals across several disciplines — compliance, risk management, governance, GRC tooling, or customer trust. Requirements: Based in SF or NYC. 5+ years in GRC or compliance, experience with SOC 2, ISO 27001, or similar frameworks.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-other",
+        "notes": "GRC/compliance role AND US-only. Completely wrong function."
+      }
+    },
+    {
+      "id": "golden-011",
+      "source": "real",
+      "title": "Job Application for AI",
+      "company": "navvis",
+      "location": "Munich Hybrid",
+      "job_description": "AI-Enabled Revenue Operations Specialist (F/M/D). Munich Hybrid. THE OPPORTUNITY: The way B2B revenue teams operate is fundamentally reshaped by AI. We're building a Revenue Operations function designed for this moment. As our AI-Enabled Revenue Operations Specialist, you will own three interconnected missions: Revenue Insights & Reporting (build AI-enhanced analytics across the full funnel), Workflow Design & Optimization (redesign how revenue teams work together from lead to opportunity to customer), and Tooling & Automation (identify and implement AI tools). Requirements: 3+ years in Revenue Operations or Sales Operations, experience with CRM systems (Salesforce), strong analytical skills, SQL knowledge a plus.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "wrong-function-other",
+        "notes": "RevOps role but title is just \"Job Application for AI\" — WRONG_FUNCTION only checks title. LLM should score low."
+      }
+    },
+    {
+      "id": "golden-012",
+      "source": "real",
+      "title": "Job Application for Business Development Specialist (Polish speaking) (F/M/D) at NavVis",
+      "company": "navvis",
+      "location": "Poland Remote",
+      "job_description": "Business Development Specialist (Polish speaking) (F/M/D). Poland Remote. THE OPPORTUNITY: Are you ready to launch your sales career in a fast-growing international tech company? At NavVis, we need a passionate Business Development Specialist to help scale our presence in the Poland market. In this role you will build a sales pipeline in the Poland region, prospect and qualify leads in construction, surveying, and engineering industries, and work with Account Executives and Customer Success Managers. Requirements: Native or fluent Polish speaker required. 1-2 years sales or business development experience. Ideally based in Poland.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-sales",
+        "notes": "BDS/sales role in Poland requiring Polish. Wrong function + wrong location. Agent scored 90."
+      }
+    },
+    {
+      "id": "golden-013",
+      "source": "real",
+      "title": "Job Application for Cloud Engineer (F/M/D) at NavVis",
+      "company": "navvis",
+      "location": "Munich Hybrid",
+      "job_description": "Cloud Engineer (F/M/D). Munich Hybrid. THE OPPORTUNITY: Play a key role in the development of our pioneering browser-based 3D application that produces high-quality photorealistic digital twins. You'll join our dynamic cloud team working on the platform that supports NavVis IVION. HOW YOU WILL MAKE AN IMPACT: Developing and operating applications on Kubernetes using Infrastructure-as-Code via Terraform, Helm and ArgoCD. Building and maintaining CI/CD pipelines. Driving cloud cost optimization. Requirements: 3+ years cloud engineering experience, expertise in Kubernetes and Terraform, proficiency in Go or Python, experience with AWS or GCP.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-engineering",
+        "notes": "Cloud Engineer — wrong function. Munich hybrid is fine but role is engineering."
+      }
+    },
+    {
+      "id": "golden-014",
+      "source": "real",
+      "title": "Job Application for Cloud Platform Product Manager (F/M/D) at NavVis",
+      "company": "navvis",
+      "location": "Munich Hybrid",
+      "job_description": "Cloud Platform Product Manager (F/M/D). Munich Hybrid. OUR VISION: When people use our technology to bridge the gap between the physical and digital worlds, they don't just capture reality — they create a new one. THE OPPORTUNITY: Does the opportunity to shape the future of NavVis Cloud, the platform powering our enterprise SaaS products, appeal to you? In this role you will work closely with platform and backend engineers, product managers, and business operations teams to define and drive the roadmap for NavVis Cloud (NVC). You will play a key role in scaling our cloud-based platform that enables NavVis products to be deployed and operated efficiently across thousands of customer environments. Requirements: 5+ years product management experience with cloud or SaaS platforms, ability to translate technical concepts for non-technical stakeholders, experience with agile delivery. Fluent English required.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "TRUE POSITIVE — only correct match in production eval. PM role at Munich hybrid company. Agent scored only 60 (below threshold 70), suggesting LLM underscored it."
+      }
+    },
+    {
+      "id": "golden-015",
+      "source": "real",
+      "title": "NavVis Employee Spotlight: Moritz Pfeiffer, Finance Team Lead",
+      "company": "navvis",
+      "location": "",
+      "job_description": "Kourtney Kirton, Jun 6 2023, 8 min read. NavVis Employee Spotlight: Moritz Pfeiffer, Finance Team Lead. Meet our Finance Team Lead, Moritz Pfeiffer, and learn about his journey at NavVis, what he enjoys most about working here, and his advice for candidates. Moritz joined NavVis three years ago after working at a Big Four accounting firm. He leads a team of five finance professionals and is passionate about building scalable financial processes as the company grows.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "not-a-job",
+        "category": "not-a-job",
+        "notes": "Blog post / employee spotlight — not a job listing. Agent scored 75."
+      }
+    },
+    {
+      "id": "golden-016",
+      "source": "real",
+      "title": "Early Career",
+      "company": "apple",
+      "location": "Munich, Germany",
+      "job_description": "Early Career — DFT Engineer (M, F, D). Munich, Bavaria-Bayern, Germany. Hardware. Summary: Imagine what you could do here. At Apple, new insights have a way of becoming extraordinary products very quickly. Do you enjoy working on challenges that no one has solved yet? We are searching for a passionate engineer to join our team redefining hardware technology. As a DFT (Design For Testability) Engineer, you will develop test strategies for cutting-edge silicon, implement scan insertion and ATPG flows, collaborate with design teams to ensure testability. Requirements: BS/MS in Electrical Engineering or Computer Science, knowledge of VLSI design and digital logic, experience with DFT methodologies preferred, this is an early career position — 0-2 years experience.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "too-junior",
+        "category": "too-junior",
+        "notes": "Early career (title starts with 'Early Career') AND wrong function (hardware engineer). Agent scored 80."
+      }
+    },
+    {
+      "id": "golden-017",
+      "source": "real",
+      "title": "Director Fleet Intelligence & AI (m/f/d)",
+      "company": "sixt",
+      "location": "Munich, Germany",
+      "job_description": "Director Fleet Intelligence & AI (m/f/d). TECH & Engineering. Full-time. Munich, Germany. The role of Director Fleet Intelligence & AI is a unique opportunity to make significant business impact at SIXT. You will be responsible for leading a team of data scientists and engineers to develop AI models that optimize our global fleet of 200,000+ vehicles. This includes predictive maintenance, demand forecasting, vehicle allocation optimization, and real-time fleet tracking. You will own the product and technical roadmap for fleet intelligence, define OKRs, and present results to the C-suite. Requirements: 8+ years in data science or AI/ML leadership, experience managing cross-functional engineering teams, strong background in operations research or logistics optimization, PhD preferred.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "wrong-function-engineering",
+        "notes": "Fleet Intelligence AI Director — title does not match WRONG_FUNCTION regex. LLM should score low (operations/ML director, not PM)."
+      }
+    },
+    {
+      "id": "golden-018",
+      "source": "real",
+      "title": "Schadensjurist (m/w/d)",
+      "company": "sixt",
+      "location": "Munich, Germany",
+      "job_description": "Schadensjurist (m/w/d). Law & Taxes. Full-time. Munich, Germany. Sie brennen für Verkehrsrecht und lieben es, komplexe Schadensfälle strategisch zu lösen? Als Schadensjurist bei SIXT steuern Sie die rechtliche Bearbeitung von Kfz-Schadensfällen, verhandeln mit Versicherungen und gegnerischen Anwälten, und vertreten SIXT in streitigen Verfahren. Sie arbeiten eng mit unseren Flotten- und Kundencenter-Teams zusammen. Anforderungen: Volljurist (2. Staatsexamen), Spezialisierung im Verkehrs- oder Versicherungsrecht, 2+ Jahre Berufserfahrung als Rechtsanwalt oder Syndikusrechtsanwalt, Deutsch auf muttersprachlichem Niveau.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-other",
+        "notes": "Legal/lawyer role (Jurist). Explicitly in WRONG_FUNCTION regex. Agent scored 80."
+      }
+    },
+    {
+      "id": "golden-019",
+      "source": "real",
+      "title": "Director Accounting North America (m/f/d)",
+      "company": "sixt",
+      "location": "Munich, Germany",
+      "job_description": "Director Accounting North America (m/f/d). Finance & Internal Audit. Full-time. Munich, Germany. SIXT is growing and North America is one of our most dynamic markets. The Director Accounting North America takes on a pivotal role overseeing all US and Canadian accounting operations from our Munich headquarters. You will manage month-end close, ensure GAAP and IFRS compliance, lead a team of 8 accountants, drive process automation, and serve as the primary contact for US auditors. Requirements: CPA or equivalent, 10+ years in accounting or finance, GAAP and IFRS expertise required, prior experience in automotive or rental industry preferred, business-level English and German.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-other",
+        "notes": "Accounting Director — completely wrong function. Despite Munich location, agent scored 90."
+      }
+    },
+    {
+      "id": "golden-020",
+      "source": "real",
+      "title": "People Analytics Graduated Internship (12 months)",
+      "company": "celonis",
+      "location": "Madrid, Spain",
+      "job_description": "People Analytics Graduated Internship (12 months). Corporate. Working Student & Intern. Madrid, Spain. Celonis is the global leader in Process Intelligence. As a Working Student within the Data Analytics & Transformation Team, you will focus on the people data domain, helping unlock insights that improve the internal workforce experience. You will collaborate with HR business partners, analyze attrition and engagement data, build dashboards in Tableau, and support quarterly workforce planning. This is a 12-month paid internship for recent graduates. Requirements: Bachelor's or Master's degree (recently graduated), experience with SQL and Python, familiarity with HR analytics concepts, fluent English, Spanish is a plus.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "too-junior",
+        "category": "too-junior",
+        "notes": "Explicit internship for recent graduates — too junior. Agent scored 98 — catastrophic false positive."
+      }
+    },
+    {
+      "id": "golden-021",
+      "source": "synthetic",
+      "title": "Senior Product Manager — Developer Experience",
+      "company": "JetBrains",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Senior Product Manager — Developer Experience. Munich Hybrid (3 days onsite). JetBrains creates tools that make software development a more productive and enjoyable experience. We are looking for a Senior Product Manager to own the developer experience vision for IntelliJ IDEA and our broader IDE ecosystem used by 15M+ developers worldwide. In this role you will define and drive the product roadmap for core IDE workflows, conduct continuous discovery with developers through interviews and usage data, write detailed PRDs, partner with engineering teams across Munich and Prague, and present strategy to leadership. What you bring: 7+ years product management experience, deep empathy for developer workflows, experience with developer tools or B2D products, strong analytical and communication skills, fluent English required (German is a plus). We offer a collaborative environment, flexible hybrid work, and the opportunity to shape tools used by millions.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — developer tools PM in Munich hybrid. Excellent match for candidate profile."
+      }
+    },
+    {
+      "id": "golden-022",
+      "source": "synthetic",
+      "title": "Group Product Manager — Growth & Activation",
+      "company": "Typeform",
+      "location": "Remote (EU timezone)",
+      "job_description": "Group Product Manager — Growth & Activation. Remote (EU timezone). Typeform is on a mission to bring people closer through better conversations. Our products are used by 150,000+ businesses to create forms, surveys, and interactive experiences. We're looking for a Group PM to lead our Growth squad and own the activation and expansion funnel for Typeform's self-serve B2C business. You will define the growth strategy, run experiments, own the onboarding experience, and manage two PM reports. What you bring: 8+ years in product management with at least 2 years leading growth or PLG initiatives, deep understanding of activation funnels and A/B testing, experience with B2C SaaS, strong data intuition (SQL a plus), excellent written and verbal English. Remote-first culture with async collaboration across EU timezones.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — B2C growth PM, remote EU. Good match."
+      }
+    },
+    {
+      "id": "golden-023",
+      "source": "synthetic",
+      "title": "Principal Product Manager — Platform",
+      "company": "Contentful",
+      "location": "Berlin, Germany (Hybrid) or Remote EU",
+      "job_description": "Principal Product Manager — Platform. Berlin Hybrid or Remote EU. Contentful is the leading content platform powering digital experiences for brands like Spotify, Urban Outfitters, and Intercom. We're hiring a Principal PM to own our Platform products — the APIs, SDKs, and extensibility surfaces used by 30,000+ developers. You will set the long-term platform vision, align cross-functional stakeholders across engineering, design, and go-to-market, conduct deep customer research with technical users, and mentor junior PMs. What you bring: 10+ years product management, experience with developer-facing APIs or platform products, ability to engage credibly with both technical and business audiences, exceptional written communication, fluent English required.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — principal PM, platform + developer tools, Berlin/Remote EU."
+      }
+    },
+    {
+      "id": "golden-024",
+      "source": "synthetic",
+      "title": "Director of Product — B2C Mobile",
+      "company": "N26",
+      "location": "Berlin, Germany",
+      "job_description": "Director of Product — B2C Mobile. Berlin, Germany (On-site or hybrid). N26 is Europe's leading mobile bank, serving 8 million customers across 24 markets. We're hiring a Director of Product to lead our consumer mobile experience across iOS and Android. You will manage a team of 4 PMs, define the product vision for the core banking experience, drive engagement and retention improvements, and collaborate with engineering, design, and compliance. This is a senior leadership role with significant company-wide impact. What you bring: 10+ years in product management, 3+ years leading PM teams, experience with B2C mobile apps at scale, strong understanding of consumer behavior and growth metrics, ability to navigate regulated industries. Excellent English required; German is a strong plus.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — Director of Product, B2C mobile, Berlin."
+      }
+    },
+    {
+      "id": "golden-025",
+      "source": "synthetic",
+      "title": "Senior Product Manager — AI Assistant Features",
+      "company": "Personio",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Senior Product Manager — AI Assistant Features. Munich Hybrid. Personio is Europe's leading HR software for SMEs, serving 14,000+ customers. We're looking for a Senior PM to define and build AI-powered features within our HR platform — smart suggestions, automated workflows, and conversational interfaces that save HR managers hours each week. You will work with a dedicated AI engineering team, conduct user research with HR professionals, define success metrics, and iterate rapidly. What you bring: 6+ years product management experience, passion for AI products and experience working with ML teams, strong user research skills including continuous discovery practices, data-driven approach to product decisions, fluent German and English preferred. Munich office is our hub — 3 days/week onsite.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — AI features PM, Munich hybrid. Matches candidate's continuous discovery skills."
+      }
+    },
+    {
+      "id": "golden-026",
+      "source": "synthetic",
+      "title": "Head of Product — Consumer Apps",
+      "company": "AboutYou",
+      "location": "Hamburg, Germany (Hybrid) or Remote DE",
+      "job_description": "Head of Product — Consumer Apps. Hamburg Hybrid or Remote within Germany. About You is one of Europe's fastest-growing fashion e-commerce platforms with 12M+ active customers. We're hiring a Head of Product to own the consumer app experience on iOS and Android. You will lead a team of 6 PMs across search, browse, checkout, and personalization, define the 3-year product strategy, manage OKRs, and influence engineering and design direction. What you bring: 10+ years product management including 3+ years in a leadership role, proven success scaling a B2C consumer product, strong grasp of e-commerce metrics (conversion, AOV, retention), excellent leadership and communication skills, fluent German preferred.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — Head of Product, B2C e-commerce, German location."
+      }
+    },
+    {
+      "id": "golden-027",
+      "source": "synthetic",
+      "title": "Senior Product Manager — Analytics Platform",
+      "company": "Grafana Labs",
+      "location": "Remote (Europe)",
+      "job_description": "Senior Product Manager — Analytics Platform. Remote Europe. Grafana Labs builds open-source software used by millions of engineers to observe and understand their systems. We're hiring a Senior PM to own the core analytics and visualization experience in Grafana Cloud. You will define the roadmap for dashboards, alerting, and query UX, work with our distributed engineering team across EU timezones, engage with our open-source community and enterprise customers through continuous discovery, and drive usage growth for Grafana Cloud. What you bring: 7+ years product management, experience with analytics, observability, or developer tools products, comfortable engaging technical users (developers and DevOps engineers), strong written communication for async collaboration, passion for open source.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — analytics platform PM, remote EU, developer tools domain."
+      }
+    },
+    {
+      "id": "golden-028",
+      "source": "synthetic",
+      "title": "Group Product Manager — Collaboration Features",
+      "company": "Miro",
+      "location": "Amsterdam, Netherlands (Hybrid) or Remote EU",
+      "job_description": "Group Product Manager — Collaboration Features. Amsterdam Hybrid or Remote EU. Miro is the visual collaboration platform used by 70M+ users. We're looking for a Group PM to lead our real-time collaboration squad — cursors, presence, comments, and the core multiplayer experience that makes Miro unique. You will own the product vision for collaboration primitives, manage two PMs, partner with engineering and design, conduct user research, and define the metrics and experiments to improve session engagement. What you bring: 8+ years product management, experience with collaboration or communication products, data-driven approach with strong experimentation skills, excellent written communication, comfortable operating in a globally distributed team across EU timezones.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — Group PM, collaboration B2C product, remote EU."
+      }
+    },
+    {
+      "id": "golden-029",
+      "source": "synthetic",
+      "title": "Senior Product Manager — Search & Discovery",
+      "company": "Zalando",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Senior Product Manager — Search & Discovery. Berlin, Germany (Hybrid). Zalando is Europe's leading fashion platform with 50M+ active customers. We're hiring a Senior PM to own the search and discovery experience — the algorithms, interfaces, and personalization that help customers find what they love. You will collaborate with ML engineers and data scientists to improve search relevance, run A/B tests, analyze customer behavior, and define the roadmap for fashion discovery across web and mobile. What you bring: 6+ years product management experience, experience with search, recommendations, or feed products, strong analytical skills and hypothesis-driven approach, ability to collaborate with technical teams, fluent English required.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — B2C e-commerce PM in Berlin."
+      }
+    },
+    {
+      "id": "golden-030",
+      "source": "synthetic",
+      "title": "Director of Product — API & Platform",
+      "company": "Twilio",
+      "location": "Remote (Europe, Munich preferred)",
+      "job_description": "Director of Product — API & Platform. Remote Europe (Munich preferred). Twilio powers communications for 300,000+ businesses. We're looking for a Director of Product to lead our European platform team, owning developer-facing APIs for SMS, voice, and messaging. You will define the platform strategy, manage a team of 3 senior PMs, align with engineering leadership on technical roadmap, conduct customer research with enterprise developers, and represent the European market perspective globally. What you bring: 10+ years product management, experience with APIs or developer platforms, ability to lead and mentor PM teams, strong technical credibility without needing to write code, excellent English required, German is a strong advantage.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — Director of Product, API/platform, remote EU with Munich preference."
+      }
+    },
+    {
+      "id": "golden-031",
+      "source": "synthetic",
+      "title": "Senior Product Manager — Mobile App",
+      "company": "Blinkist",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Senior Product Manager — Mobile App. Berlin, Germany (Hybrid). Blinkist helps 28M+ people learn more in less time through key insights from nonfiction books. We're hiring a Senior PM to own the core mobile reading experience on iOS and Android. You will drive retention and engagement improvements, define the roadmap for the daily reading habit, partner with design and engineering, run continuous discovery interviews with readers, and iterate using qualitative and quantitative signals. What you bring: 6+ years product management in consumer apps, deep understanding of engagement and retention loops, experience with mobile-first products, strong user research skills including Jobs-to-be-Done and continuous discovery, fluent English.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — B2C mobile PM, Berlin hybrid. Matches candidate's continuous discovery expertise."
+      }
+    },
+    {
+      "id": "golden-032",
+      "source": "synthetic",
+      "title": "Principal Product Manager — Marketplace",
+      "company": "CHECK24",
+      "location": "Munich, Germany",
+      "job_description": "Principal Product Manager — Marketplace. Munich, Germany (Hybrid/On-site). CHECK24 is Germany's largest comparison portal with 20M+ registered customers. We're looking for a Principal PM to own our insurance marketplace — the discovery, comparison, and purchase funnel for health, car, and home insurance products. You will drive conversion optimization, own the partner integration strategy, conduct user research to improve decision journeys, and collaborate with our large engineering teams. What you bring: 8+ years product management in marketplace or e-commerce, strong analytical approach to funnel optimization, experience with A/B testing at scale, excellent German and English required, deep understanding of German consumer market preferred.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — B2C marketplace PM in Munich. German language is a plus that candidate likely has."
+      }
+    },
+    {
+      "id": "golden-033",
+      "source": "synthetic",
+      "title": "Head of Product — Language Learning App",
+      "company": "Babbel",
+      "location": "Berlin, Germany (Hybrid) or Remote EU",
+      "job_description": "Head of Product — Language Learning App. Berlin Hybrid or Remote EU. Babbel is the world's top-grossing language learning app with 10M+ subscribers. We're hiring a Head of Product to lead the consumer app experience across iOS, Android, and web. You will manage a team of 5 PMs spanning onboarding, learning loops, social features, and monetization. You will define the 2-year product vision, own the roadmap, and partner with our Berlin-based engineering and design leadership. What you bring: 10+ years product management, 3+ years leading PM teams, deep experience with B2C consumer apps and subscription businesses, passion for language learning or education, fluent English required, German is a plus.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — Head of Product, B2C subscription app, Berlin/Remote EU."
+      }
+    },
+    {
+      "id": "golden-034",
+      "source": "synthetic",
+      "title": "Senior Product Manager — Core Product",
+      "company": "Pitch",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Senior Product Manager — Core Product. Berlin, Germany (Hybrid). Pitch is building the modern presentation tool loved by the world's best design-forward teams. We're hiring a Senior PM to own core product features — editor performance, templates, and the collaboration layer used by 2M+ professionals. You will conduct deep user research, define the product roadmap, write detailed specs, partner with a talented cross-functional team, and drive outcomes measured by engagement and NPS. What you bring: 6+ years product management in B2C or productivity tools, strong taste for design quality, experience with collaboration software, excellent written communication, fluent English, Berlin presence preferred.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — B2C productivity tools PM, Berlin hybrid."
+      }
+    },
+    {
+      "id": "golden-035",
+      "source": "synthetic",
+      "title": "Staff Software Engineer — Backend Platform",
+      "company": "Celonis",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Staff Software Engineer — Backend Platform. Munich, Germany (Hybrid). Celonis is the global leader in Process Intelligence. We're looking for a Staff Software Engineer to join our platform team and own the design and implementation of our multi-tenant data ingestion pipeline processing billions of events per day. You will architect distributed systems, mentor junior engineers, conduct code reviews, and collaborate with product managers to shape the technical roadmap. Requirements: 8+ years software engineering, expertise in Java or Go, deep knowledge of distributed systems and Kafka, experience with Kubernetes and AWS, strong track record of leading technical initiatives.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-engineering",
+        "notes": "Software Engineer — wrong function."
+      }
+    },
+    {
+      "id": "golden-036",
+      "source": "synthetic",
+      "title": "Senior Machine Learning Engineer — NLP",
+      "company": "Aleph Alpha",
+      "location": "Heidelberg, Germany (Hybrid)",
+      "job_description": "Senior Machine Learning Engineer — NLP. Heidelberg, Germany (Hybrid). Aleph Alpha is Europe's leading AI company. We're building sovereign AI infrastructure for enterprises and governments. We need a Senior ML Engineer to develop and fine-tune large language models for European languages. You will design training pipelines, conduct experiments, evaluate model quality, and collaborate with research scientists. Requirements: PhD or MSc in ML/AI, 4+ years deep learning experience, proficiency in Python and PyTorch, experience with transformer architectures, publications in NLP a plus.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-engineering",
+        "notes": "ML Engineer — wrong function despite relevant AI domain."
+      }
+    },
+    {
+      "id": "golden-037",
+      "source": "synthetic",
+      "title": "Lead Data Engineer",
+      "company": "Zalando",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Lead Data Engineer. Berlin, Germany (Hybrid). Zalando's Data Platform team powers analytics for 50M+ customers and 6,000 brand partners. We're looking for a Lead Data Engineer to own the design and scaling of our real-time data pipelines. You will architect our data lake infrastructure on AWS, mentor a team of 4 engineers, standardize data quality practices, and collaborate with ML and analytics teams. Requirements: 7+ years data engineering, expertise in Spark, Kafka, and AWS, experience leading engineering teams, strong Python or Scala skills.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-engineering",
+        "notes": "Data Engineer — wrong function."
+      }
+    },
+    {
+      "id": "golden-038",
+      "source": "synthetic",
+      "title": "Senior Frontend Engineer — Design System",
+      "company": "Personio",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Senior Frontend Engineer — Design System. Munich, Germany (Hybrid). Personio is building the HR platform used by 14,000+ SMEs. We're looking for a Senior Frontend Engineer to own and evolve our design system, used by 30+ product squads. You will build reusable React components, establish documentation standards, improve accessibility, and collaborate with design and product. Requirements: 5+ years frontend development, deep expertise in React and TypeScript, experience building or maintaining design systems, strong eye for accessibility and performance, fluent English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-engineering",
+        "notes": "Frontend Engineer — wrong function."
+      }
+    },
+    {
+      "id": "golden-039",
+      "source": "synthetic",
+      "title": "Cloud Infrastructure Engineer",
+      "company": "SumUp",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Cloud Infrastructure Engineer. Berlin, Germany (Hybrid). SumUp powers payments for 4M+ small businesses worldwide. We're looking for a Cloud Infrastructure Engineer to build and maintain our AWS-based infrastructure serving millions of daily transactions. You will design IaC solutions with Terraform, implement monitoring and observability, drive cost optimization, and participate in on-call rotation. Requirements: 4+ years cloud engineering, expertise in AWS, proficiency with Terraform and Kubernetes, experience with high-availability systems, strong scripting skills in Python or Bash.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-engineering",
+        "notes": "Cloud engineer — wrong function."
+      }
+    },
+    {
+      "id": "golden-040",
+      "source": "synthetic",
+      "title": "Senior iOS Engineer",
+      "company": "N26",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Senior iOS Engineer. Munich, Germany (Hybrid). N26 is Europe's leading mobile bank. We're looking for a Senior iOS Engineer to build the mobile banking experience used by 8M customers. You will implement new features in Swift, improve app performance and stability, collaborate with product managers and designers, and participate in code reviews. Requirements: 5+ years iOS development, deep Swift and UIKit expertise, experience with financial apps or complex data synchronization, strong understanding of iOS architecture patterns, fluent English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-engineering",
+        "notes": "iOS Engineer — wrong function."
+      }
+    },
+    {
+      "id": "golden-041",
+      "source": "synthetic",
+      "title": "DevOps Engineer",
+      "company": "Contentful",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "DevOps Engineer. Berlin, Germany (Hybrid). Contentful powers content for 30% of the Fortune 500. We're looking for a DevOps Engineer to improve our CI/CD pipelines, manage Kubernetes clusters on GCP, implement SLOs and monitoring, and help engineering teams ship faster and more reliably. You will own deployment automation, incident response processes, and platform security hardening. Requirements: 4+ years DevOps or SRE experience, expertise in Kubernetes and GCP, proficiency with GitHub Actions or similar CI/CD tools, scripting in Python or Go, on-call experience.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-engineering",
+        "notes": "DevOps Engineer — wrong function."
+      }
+    },
+    {
+      "id": "golden-042",
+      "source": "synthetic",
+      "title": "Principal Data Scientist — Personalization",
+      "company": "About You",
+      "location": "Hamburg, Germany (Hybrid)",
+      "job_description": "Principal Data Scientist — Personalization. Hamburg, Germany (Hybrid). About You is a leading EU fashion e-commerce platform. We're looking for a Principal Data Scientist to own our personalization models that power product recommendations for 12M+ customers. You will develop and deploy ML models, design experiments, collaborate with engineers, and present findings to leadership. Requirements: PhD or MSc in Statistics, ML, or related field, 6+ years industry data science experience, expertise in Python and ML frameworks, experience with recommendation systems, strong statistical intuition.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "wrong-function-engineering",
+        "notes": "Data Scientist — not in WRONG_FUNCTION regex. LLM should score low."
+      }
+    },
+    {
+      "id": "golden-043",
+      "source": "synthetic",
+      "title": "Site Reliability Engineer",
+      "company": "Grafana Labs",
+      "location": "Remote (Europe)",
+      "job_description": "Site Reliability Engineer. Remote Europe. Grafana Labs is the company behind the world's most popular open-source observability stack. We're looking for an SRE to maintain the reliability and scalability of Grafana Cloud, serving millions of engineers globally. You will define SLOs, respond to incidents, build automation, and collaborate with engineering teams to improve reliability practices. Requirements: 4+ years SRE or infrastructure engineering, expertise in Kubernetes and distributed systems, proficiency in Go or Python, strong incident management experience, comfort with on-call rotation.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-engineering",
+        "notes": "SRE — wrong function."
+      }
+    },
+    {
+      "id": "golden-044",
+      "source": "synthetic",
+      "title": "QA / Test Automation Engineer",
+      "company": "Miro",
+      "location": "Amsterdam, Netherlands (Hybrid)",
+      "job_description": "QA / Test Automation Engineer. Amsterdam, Netherlands (Hybrid). Miro is the visual collaboration platform used by 70M+ users. We're looking for a QA Engineer to own the automated testing strategy for our core collaboration features. You will build and maintain test frameworks in TypeScript, implement CI/CD quality gates, conduct exploratory testing, and collaborate with product and engineering teams to ship quality features faster. Requirements: 4+ years QA or test automation engineering, expertise in Playwright or Selenium, proficiency in TypeScript or JavaScript, experience testing complex web applications.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-engineering",
+        "notes": "QA Engineer — wrong function."
+      }
+    },
+    {
+      "id": "golden-045",
+      "source": "synthetic",
+      "title": "Solutions Architect — Enterprise",
+      "company": "MongoDB",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Solutions Architect — Enterprise. Munich, Germany (Hybrid). MongoDB is the leading developer data platform. We're looking for a Solutions Architect to partner with our enterprise sales team in the DACH region, helping customers design data architectures on MongoDB Atlas. You will run technical discovery, build proof-of-concepts, present at customer workshops, and serve as the technical voice of the customer back to product teams. Requirements: 5+ years in solutions architecture or similar pre-sales technical role, deep knowledge of database systems, proficiency in at least two programming languages, customer-facing communication skills in German and English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "wrong-function-engineering",
+        "notes": "Solutions Architect — only \"solutions engineer\" is in WRONG_FUNCTION, not \"solutions architect\". LLM should score low."
+      }
+    },
+    {
+      "id": "golden-046",
+      "source": "synthetic",
+      "title": "Account Executive — DACH",
+      "company": "Figma",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Account Executive — DACH. Munich, Germany (Hybrid). Figma is the collaborative design tool used by leading companies worldwide. We're looking for an Account Executive to own our DACH enterprise territory, driving net-new and expansion revenue across Germany, Austria, and Switzerland. You will prospect enterprise accounts, run discovery calls, manage complex sales cycles, collaborate with solution engineers, and exceed quota. Requirements: 5+ years enterprise software sales in DACH, proven track record of exceeding quota, experience selling design or creative tools preferred, native German and fluent English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-sales",
+        "notes": "Account Executive — wrong function (sales)."
+      }
+    },
+    {
+      "id": "golden-047",
+      "source": "synthetic",
+      "title": "Customer Success Manager — Mid-Market",
+      "company": "Personio",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Customer Success Manager — Mid-Market. Munich, Germany (Hybrid). Personio is the leading HR software for European SMEs. We're looking for a Customer Success Manager to own a portfolio of 80-100 mid-market customers. You will conduct QBRs, drive product adoption and expansion, serve as the customer's advocate internally, and reduce churn. Requirements: 3+ years in Customer Success or Account Management for SaaS, strong communication skills in German and English, data-driven approach to customer health, experience with CRM systems.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-sales",
+        "notes": "Customer Success Manager — wrong function."
+      }
+    },
+    {
+      "id": "golden-048",
+      "source": "synthetic",
+      "title": "Senior Business Development Manager — Partnerships",
+      "company": "Zalando",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Senior Business Development Manager — Partnerships. Berlin, Germany (Hybrid). Zalando is Europe's leading fashion platform. We're looking for a Senior BD Manager to identify, negotiate, and close strategic brand partnerships that bring new revenue streams to Zalando. You will lead complex deal negotiations, manage a pipeline of partnership opportunities, collaborate with legal, finance, and operations, and represent Zalando at industry events. Requirements: 6+ years in business development or partnerships, experience in e-commerce or marketplace, strong negotiation skills, fluent German and English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-sales",
+        "notes": "Business Development Manager — wrong function (BD in WRONG_FUNCTION regex)."
+      }
+    },
+    {
+      "id": "golden-049",
+      "source": "synthetic",
+      "title": "Enterprise Sales Manager — EMEA",
+      "company": "Typeform",
+      "location": "Remote (Europe)",
+      "job_description": "Enterprise Sales Manager — EMEA. Remote Europe. Typeform helps businesses collect data through beautiful conversational forms. We're hiring an Enterprise Sales Manager to own enterprise revenue in EMEA. You will identify and close new enterprise logos, manage complex 6-figure sales cycles, build relationships with C-suite buyers, and collaborate with pre-sales and customer success. Requirements: 6+ years enterprise software sales, experience with PLG to Enterprise motion, strong prospecting skills, ability to manage long sales cycles, fluent English required, additional European language a plus.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-sales",
+        "notes": "Sales Manager — wrong function."
+      }
+    },
+    {
+      "id": "golden-050",
+      "source": "synthetic",
+      "title": "Account Manager — Strategic Accounts",
+      "company": "Celonis",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Account Manager — Strategic Accounts. Munich, Germany (Hybrid). Celonis is the global leader in Process Intelligence. We're looking for an Account Manager to manage and grow relationships with 15-20 strategic enterprise accounts in DACH. You will conduct executive business reviews, drive renewal and expansion, identify upsell opportunities, and act as the customer's main point of contact. Requirements: 5+ years in enterprise account management or sales, experience with complex SaaS renewals and expansions, strong relationship-building skills, fluent German and English required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-sales",
+        "notes": "Account Manager — wrong function (in WRONG_FUNCTION regex)."
+      }
+    },
+    {
+      "id": "golden-051",
+      "source": "synthetic",
+      "title": "Customer Success Director — EMEA",
+      "company": "Grafana Labs",
+      "location": "Remote (Europe)",
+      "job_description": "Customer Success Director — EMEA. Remote Europe. Grafana Labs is looking for a Customer Success Director to lead our EMEA customer success organization. You will manage a team of 10 CSMs, define the CS strategy for EMEA, own renewal and expansion targets, partner with sales leadership, and drive NPS improvement across our customer base. Requirements: 8+ years in customer success with at least 3 years in leadership, experience managing large CSM teams, deep knowledge of SaaS renewal economics, ability to engage C-level executives, fluent English required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-sales",
+        "notes": "Customer Success Director — wrong function."
+      }
+    },
+    {
+      "id": "golden-052",
+      "source": "synthetic",
+      "title": "Partner Manager — ISV Ecosystem",
+      "company": "Contentful",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Partner Manager — ISV Ecosystem. Berlin, Germany (Hybrid). Contentful is the leading content platform. We're looking for a Partner Manager to build and manage relationships with Independent Software Vendors who integrate with Contentful's API. You will recruit new ISV partners, manage the partner program, drive co-marketing initiatives, and track partner-sourced revenue. Requirements: 4+ years in partner management or alliances, experience with technology or API partnerships, strong program management skills, fluent English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "wrong-function-sales",
+        "notes": "Partner Manager — not in WRONG_FUNCTION. LLM should score low (BD/partnerships, not PM)."
+      }
+    },
+    {
+      "id": "golden-053",
+      "source": "synthetic",
+      "title": "Senior Product Manager — Payments Platform",
+      "company": "Stripe",
+      "location": "San Francisco, CA, United States",
+      "job_description": "Senior Product Manager — Payments Platform. San Francisco, CA. United States only. Stripe powers payments for millions of businesses. We're looking for a Senior PM to own our core payments API — the most widely used payments infrastructure in the world. You will define the API strategy, conduct research with developers and platform builders, work with engineering to ship new payment methods, and drive adoption metrics. What you bring: 7+ years product management, experience with developer-facing products or APIs, strong technical depth, located in San Francisco or willing to relocate. US work authorization required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "San Francisco, US-only with work authorization requirement."
+      }
+    },
+    {
+      "id": "golden-054",
+      "source": "synthetic",
+      "title": "Group Product Manager — Consumer Experience",
+      "company": "Meta",
+      "location": "Menlo Park, CA, United States",
+      "job_description": "Group Product Manager — Consumer Experience. Menlo Park, CA. Meta is building the future of human connection. We're looking for a Group PM to lead the consumer experience team for Instagram Stories and Reels, managing a team of 4 PMs. You will define the short-form video strategy, drive engagement and creator metrics, collaborate with AI teams on recommendations, and work with global engineering teams. Based in Menlo Park, CA. US work authorization required. Visa sponsorship available for qualified candidates.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "Menlo Park, CA — US-only."
+      }
+    },
+    {
+      "id": "golden-055",
+      "source": "synthetic",
+      "title": "Director of Product — Growth",
+      "company": "Uber",
+      "location": "San Francisco, CA, United States",
+      "job_description": "Director of Product — Growth. San Francisco, CA. Uber is building the future of transportation and delivery. We're looking for a Director of Product to lead growth initiatives for Uber Eats in the Americas. You will manage a team of 5 PMs, define the acquisition and retention strategy, run large-scale experiments, and influence the P&L. Based in San Francisco. US work authorization required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "San Francisco — US-only."
+      }
+    },
+    {
+      "id": "golden-056",
+      "source": "synthetic",
+      "title": "Head of Product — B2C Platform",
+      "company": "Spotify",
+      "location": "New York, NY, United States",
+      "job_description": "Head of Product — B2C Platform. New York, NY. Spotify is the world's most popular audio streaming service. We're looking for a Head of Product based in New York to lead our core listening experience team across mobile and desktop. You will manage a team of 6 PMs, own the roadmap for the player, library, and discovery surfaces, and drive MAU and retention goals. US work authorization required. New York office presence required 3 days per week.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "New York — US-only."
+      }
+    },
+    {
+      "id": "golden-057",
+      "source": "synthetic",
+      "title": "Senior Product Manager — Developer Experience",
+      "company": "GitHub",
+      "location": "Seattle, WA, United States",
+      "job_description": "Senior Product Manager — Developer Experience. Seattle, WA (or Remote US). GitHub is where the world builds software. We're looking for a Senior PM to own the core code review experience used by 100M+ developers. You will define the roadmap, conduct research with developers, collaborate with engineering in Seattle and globally, and drive adoption of new review features. Based in Seattle preferred; remote within the United States considered. US work authorization required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "US-only (Seattle/Remote US)."
+      }
+    },
+    {
+      "id": "golden-058",
+      "source": "synthetic",
+      "title": "Principal Product Manager — Mobile",
+      "company": "Airbnb",
+      "location": "San Francisco, CA, United States",
+      "job_description": "Principal Product Manager — Mobile. San Francisco, CA. Airbnb connects people with extraordinary places to stay. We're looking for a Principal PM to own the guest mobile app experience on iOS and Android. You will define the search and booking experience strategy, manage a team of 3 PMs, run large-scale experiments, and drive conversion improvements. Based in San Francisco, CA. US work authorization required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "San Francisco — US-only."
+      }
+    },
+    {
+      "id": "golden-059",
+      "source": "synthetic",
+      "title": "Group Product Manager — Growth",
+      "company": "Canva",
+      "location": "Sydney, Australia",
+      "job_description": "Group Product Manager — Growth. Sydney, Australia. Canva is a design platform used by 150M+ people. We're looking for a Group PM to lead our international growth team from our Sydney HQ. You will own acquisition and activation for non-English markets, manage 3 PMs, run global experiments, and drive DAU growth. Based in Sydney, Australia. Australian work authorization or sponsorship required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "Sydney, Australia — APAC."
+      }
+    },
+    {
+      "id": "golden-060",
+      "source": "synthetic",
+      "title": "Senior Product Manager — Fintech",
+      "company": "Robinhood",
+      "location": "Menlo Park, CA, United States",
+      "job_description": "Senior Product Manager — Fintech. Menlo Park, CA. Robinhood is democratizing finance for all. We're looking for a Senior PM to own our crypto trading experience. You will define the product roadmap for crypto, improve the trading UX, collaborate with compliance and engineering, and drive user growth. Based in Menlo Park, CA required. US work authorization required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "Menlo Park, CA — US-only."
+      }
+    },
+    {
+      "id": "golden-061",
+      "source": "synthetic",
+      "title": "Director of Product — Enterprise SaaS",
+      "company": "Workday",
+      "location": "Toronto, Canada",
+      "job_description": "Director of Product — Enterprise SaaS. Toronto, Canada. Workday is a leading provider of enterprise cloud applications for finance and HR. We're looking for a Director of Product to lead our Canadian engineering and product team. You will own the roadmap for Workday Adaptive Planning, manage 4 PMs, conduct customer research with CFOs and finance leaders, and drive product-market fit in North America. Based in Toronto, Canada. Canadian work authorization required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "Toronto, Canada — North America."
+      }
+    },
+    {
+      "id": "golden-062",
+      "source": "synthetic",
+      "title": "Senior Product Manager — Platform",
+      "company": "Grab",
+      "location": "Singapore",
+      "job_description": "Senior Product Manager — Platform. Singapore. Grab is Southeast Asia's leading superapp. We're looking for a Senior PM to own our core platform features supporting GrabPay, GrabFood, and GrabCar across 8 countries. You will define the shared platform strategy, conduct user research across SEA markets, and drive adoption of platform services by internal product teams. Based in Singapore. Singapore work authorization or EP sponsorship required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "location",
+        "category": "wrong-location",
+        "notes": "Singapore — APAC."
+      }
+    },
+    {
+      "id": "golden-063",
+      "source": "synthetic",
+      "title": "Junior Product Manager",
+      "company": "Personio",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Junior Product Manager. Munich, Germany (Hybrid). Personio is the leading HR software for European SMEs. We're looking for a Junior PM to join our HR Core squad. You will support the product discovery process, write user stories, collaborate with engineering and design, analyze product data, and learn how to run end-to-end product initiatives. What you bring: 1-2 years in product management or related role (UX, business analysis), eagerness to learn, data-driven mindset, fluent German and English. This is an ideal role for someone who wants to grow into a full PM role.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "too-junior",
+        "category": "too-junior",
+        "notes": "Junior Product Manager — too junior."
+      }
+    },
+    {
+      "id": "golden-064",
+      "source": "synthetic",
+      "title": "Associate Product Manager (APM Program)",
+      "company": "Zalando",
+      "location": "Berlin, Germany",
+      "job_description": "Associate Product Manager — APM Program. Berlin, Germany. Zalando's APM Program is a 2-year rotational program designed to develop the next generation of product leaders. As an APM, you will rotate through 3 different squads, work directly with Senior PMs and Engineering Managers, own small product initiatives, conduct user research, and present quarterly updates to leadership. What you bring: Recently completed Bachelor's or Master's degree, strong analytical skills, curiosity about technology and product management, no prior PM experience required — we will teach you.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "too-junior",
+        "notes": "APM Program — title does not contain TOO_JUNIOR keywords. Description makes it clear this is entry-level; LLM should score low."
+      }
+    },
+    {
+      "id": "golden-065",
+      "source": "synthetic",
+      "title": "Product Manager Internship (6 months)",
+      "company": "Celonis",
+      "location": "Munich, Germany",
+      "job_description": "Product Manager Internship (6 months). Munich, Germany. Celonis is the global leader in Process Intelligence. We're offering a 6-month PM internship for students or recent graduates. You will support the platform PM team with competitive research, write product requirements, assist with user interviews, analyze usage data, and prepare roadmap presentations. Requirements: Currently enrolled in a Bachelor's or Master's program (or graduated within the last 12 months), strong analytical skills, interest in enterprise software, fluent German and English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "too-junior",
+        "category": "too-junior",
+        "notes": "Internship — explicitly too junior."
+      }
+    },
+    {
+      "id": "golden-066",
+      "source": "synthetic",
+      "title": "Graduate PM Program (18 months)",
+      "company": "Siemens",
+      "location": "Munich, Germany",
+      "job_description": "Graduate PM Program — Digital Products (18 months). Munich, Germany. Siemens is hiring recent graduates for our Product Management Graduate Program. Over 18 months you will rotate through different product teams across Siemens Digital Industries, gaining exposure to IoT, manufacturing software, and digital twin products. You will work alongside experienced PMs, take ownership of small features, and build foundational PM skills. Requirements: Master's degree required (completed within 18 months), strong academic record, interest in industrial digitalization, German and English proficiency.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "too-junior",
+        "category": "too-junior",
+        "notes": "Graduate program — too junior (contains 'graduate')."
+      }
+    },
+    {
+      "id": "golden-067",
+      "source": "synthetic",
+      "title": "Entry-Level Product Owner",
+      "company": "Allianz",
+      "location": "Munich, Germany",
+      "job_description": "Entry-Level Product Owner. Munich, Germany. Allianz Digital is building digital insurance products. We're looking for an Entry-Level Product Owner to join one of our agile squads. You will write and prioritize user stories, participate in sprint ceremonies, collaborate with developers and UX designers, and analyze user feedback. This is a starting position — ideal for candidates with 0-2 years experience. Requirements: Background in business, IT, or related field, familiarity with agile methods (Scrum), strong communication skills, German proficiency preferred.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "too-junior",
+        "category": "too-junior",
+        "notes": "Entry-level — too junior."
+      }
+    },
+    {
+      "id": "golden-068",
+      "source": "synthetic",
+      "title": "Working Student Product Management (20h/week)",
+      "company": "CHECK24",
+      "location": "Munich, Germany",
+      "job_description": "Working Student Product Management (20h/week). Munich, Germany. CHECK24 is Germany's largest comparison portal. We're looking for a working student to support our product team. You will help analyze customer feedback, conduct market research, write user stories, assist with competitive benchmarking, and prepare product presentations. Requirements: Currently enrolled in a Bachelor's or Master's program, interest in product management and e-commerce, basic SQL knowledge is a plus, fluent German required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "too-junior",
+        "category": "too-junior",
+        "notes": "Working student (contains 'student') — too junior."
+      }
+    },
+    {
+      "id": "golden-069",
+      "source": "synthetic",
+      "title": "Trainee Product Manager",
+      "company": "SAP",
+      "location": "Walldorf, Germany",
+      "job_description": "Trainee Product Manager. Walldorf, Germany. SAP's Next Talent Program is looking for ambitious graduates to join as Trainee Product Managers. Over 24 months you will work in different SAP product teams, complete structured PM training, obtain Agile certifications, and be mentored by experienced SAP product leaders. Requirements: Bachelor's or Master's degree (any field), maximum 1 year post-graduation, strong logical thinking, ability to learn quickly, German and English fluency.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "too-junior",
+        "category": "too-junior",
+        "notes": "Trainee — too junior (in TOO_JUNIOR regex)."
+      }
+    },
+    {
+      "id": "golden-070",
+      "source": "synthetic",
+      "title": "Early Career Product Manager",
+      "company": "Siemens Healthineers",
+      "location": "Erlangen, Germany (Hybrid)",
+      "job_description": "Early Career Product Manager. Erlangen, Germany (Hybrid). Siemens Healthineers is a global medical technology company. We are looking for an Early Career Product Manager to join our Digital Health unit. You will define requirements for clinical software features, work with clinical experts and developers, conduct user acceptance testing, and support product launches. Requirements: 0-3 years experience in product management, healthcare, or software, Bachelor's or Master's degree in relevant field, ability to bridge clinical and technical domains, fluent German and English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "too-junior",
+        "category": "too-junior",
+        "notes": "'Early Career' explicitly in title — caught by TOO_JUNIOR regex."
+      }
+    },
+    {
+      "id": "golden-071",
+      "source": "synthetic",
+      "title": "Our Product Team — How We Build",
+      "company": "Pitch",
+      "location": "",
+      "job_description": "Our Product Team — How We Build. At Pitch, our product team is at the heart of everything we do. We believe great products are built through empathy, curiosity, and tight collaboration with engineering and design. Our team of 12 product managers works across three squads: Core Editor, Collaboration, and Growth. We hold weekly all-hands, practice continuous discovery, and ship every two weeks. Meet some of our PMs and learn about life on the Pitch product team. Want to join us? Browse our open positions below.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "not-a-job",
+        "category": "not-a-job",
+        "notes": "Culture/team page — not a job listing."
+      }
+    },
+    {
+      "id": "golden-072",
+      "source": "synthetic",
+      "title": "Life at Miro — Berlin Office",
+      "company": "Miro",
+      "location": "Berlin",
+      "job_description": "Life at Miro — Berlin Office. What's it like to work at Miro in Berlin? Our Berlin hub is home to 200+ Mironeers spanning engineering, product, design, and operations. We have a beautiful office in Mitte with open collaboration spaces, a rooftop terrace, and a fully stocked kitchen. We celebrate our team with quarterly offsites, team lunches, and regular learning sessions. Our benefits include 30 days vacation, top-tier health insurance, €100/month learning stipend, and an annual travel allowance. If you're looking for your next role at Miro, check out our open positions. We'd love to have you join us.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "not-a-job",
+        "category": "not-a-job",
+        "notes": "Culture page / office spotlight — not a job listing."
+      }
+    },
+    {
+      "id": "golden-073",
+      "source": "synthetic",
+      "title": "Product Blog — Discovery at Scale: How We Run 100 User Interviews a Month",
+      "company": "Typeform",
+      "location": "",
+      "job_description": "Discovery at Scale: How We Run 100 User Interviews a Month. Published by Typeform Product Team, March 2025. At Typeform, continuous discovery is baked into how every product squad operates. In this post, our Principal PM shares how we structure weekly discovery calls, synthesize insights into opportunity trees, and connect user evidence to roadmap decisions. We run approximately 100 user interviews per month across our PM team of 15. Here's the playbook we've developed over three years. Key principles: schedule interviews in advance, use structured guides with room for exploration, share recordings asynchronously, and update your opportunity tree weekly.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "not-a-job",
+        "category": "not-a-job",
+        "notes": "Blog post about product discovery process — not a job listing."
+      }
+    },
+    {
+      "id": "golden-074",
+      "source": "synthetic",
+      "title": "Technical Program Manager — Platform Engineering",
+      "company": "Celonis",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Technical Program Manager — Platform Engineering. Munich, Germany (Hybrid). Celonis is looking for a Technical Program Manager to drive delivery for our platform engineering organization. You will orchestrate cross-team dependencies, own the program-level roadmap, run steering committees, track milestones, and remove blockers to help 8 engineering teams ship faster. You will partner closely with Engineering Directors and VPs of Engineering. Requirements: 6+ years in technical program management or engineering management, experience driving large cross-functional technical programs, strong stakeholder management skills, ability to break down complex dependencies, fluent English, PMP or PMI-ACP a plus.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "borderline-pass",
+        "notes": "Technical Program Manager — PM_SIGNAL matches 'program manager'. Borderline: candidate has strong delivery/roadmap skills that transfer. Should pass filters and likely score moderately high."
+      }
+    },
+    {
+      "id": "golden-075",
+      "source": "synthetic",
+      "title": "Chief of Staff to CPO",
+      "company": "N26",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Chief of Staff to CPO. Berlin, Germany (Hybrid). N26 is Europe's leading mobile bank. We're looking for a Chief of Staff to support the Chief Product Officer in running the product organization efficiently. You will own the product leadership operating rhythm (OKR process, all-hands, leadership team meetings), drive strategic initiatives assigned by the CPO, prepare board and investor materials related to product, and serve as a force multiplier for the CPO's priorities. You will be a product leader in your own right, expected to have opinions and drive decisions. Requirements: 8+ years in product management or strategy consulting, deep product management expertise, exceptional written and verbal communication, ability to influence without authority, experience at a senior level.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "borderline-pass",
+        "notes": "Chief of Staff to CPO — not caught by any filter (no PM_SIGNAL keyword but also no WRONG_FUNCTION). High-leverage role that should appeal to a senior PM. Likely scores high on LLM evaluation."
+      }
+    },
+    {
+      "id": "golden-076",
+      "source": "synthetic",
+      "title": "Product Marketing Manager — Developer Products",
+      "company": "Twilio",
+      "location": "Remote (Europe)",
+      "job_description": "Product Marketing Manager — Developer Products. Remote Europe. Twilio powers communications for 300,000+ businesses. We're looking for a Product Marketing Manager to own the positioning and go-to-market strategy for our developer-facing APIs. You will craft messaging and positioning, partner with product management on launches, create developer-focused content, run competitive analysis, enable the sales team, and measure marketing metrics. Requirements: 5+ years in product marketing for developer products, excellent written communication in English, experience with content marketing and developer evangelism, understanding of API products.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "borderline-fail",
+        "notes": "Product Marketing Manager — \"developer\" in subtitle matches WRONG_FUNCTION regex (developer role keyword). Effectively filtered correctly, albeit for the wrong word."
+      }
+    },
+    {
+      "id": "golden-077",
+      "source": "synthetic",
+      "title": "Scrum Master / Agile Coach",
+      "company": "Siemens",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Scrum Master / Agile Coach. Munich, Germany (Hybrid). Siemens Digital Industries is transforming industrial automation with software. We're looking for a Scrum Master / Agile Coach to facilitate multiple agile teams and support the product organization in adopting agile at scale. You will coach Product Owners and Development Teams, facilitate Sprint ceremonies, remove impediments, train teams in Kanban and SAFe, and drive continuous improvement. Requirements: 5+ years as Scrum Master or Agile Coach, SAFe or similar certification preferred, experience coaching large organizations, ability to influence without authority, fluent German and English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "borderline-fail",
+        "notes": "Scrum Master/Agile Coach — not caught by filters (no WRONG_FUNCTION match). LLM should score low (facilitation role, not PM)."
+      }
+    },
+    {
+      "id": "golden-078",
+      "source": "synthetic",
+      "title": "Product Operations Manager",
+      "company": "Miro",
+      "location": "Amsterdam, Netherlands (Hybrid) or Remote EU",
+      "job_description": "Product Operations Manager. Amsterdam Hybrid or Remote EU. Miro is the visual collaboration platform used by 70M+ users. We're looking for a Product Operations Manager to build the operating system for the product organization. You will design and run the OKR process, build dashboards tracking product KPIs, own the product tooling stack, standardize how squads run discovery and delivery, and serve as the central connective tissue between product, engineering, and business. Requirements: 5+ years in product operations, program management, or product management, strong analytical skills, experience building operational frameworks, excellent written communication.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "borderline-fail",
+        "notes": "Product Operations Manager — operational role, not PM. Passes filters, LLM should score lower."
+      }
+    },
+    {
+      "id": "golden-079",
+      "source": "synthetic",
+      "title": "Senior Program Manager — Product Delivery",
+      "company": "Zalando",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Senior Program Manager — Product Delivery. Berlin, Germany (Hybrid). Zalando is Europe's leading fashion platform. We're looking for a Senior Program Manager to orchestrate delivery of our 2-year technology transformation program spanning 20+ teams. You will maintain the master program plan, manage dependencies, run governance processes, track risks and issues, and report to C-level stakeholders. Requirements: 7+ years program management, experience running large technology programs with Agile and Waterfall delivery, strong stakeholder management up to C-level, PMP or Prince2 certification preferred, fluent German and English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "borderline-fail",
+        "notes": "Program Manager (delivery/governance focus) — PM_SIGNAL matches 'program manager' so passes WRONG_FUNCTION check. LLM should score low as it's delivery management, not product management."
+      }
+    },
+    {
+      "id": "golden-080",
+      "source": "synthetic",
+      "title": "IT Product Manager — Internal Tools",
+      "company": "BMW Group",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "IT Product Manager — Internal Tools. Munich, Germany (Hybrid). BMW Group is driving the future of mobility. Our Digital IT team is looking for an IT Product Manager to own our internal developer tooling platform used by 15,000 software engineers. You will define the roadmap for CI/CD tools, developer portals, and internal APIs, gather requirements from internal stakeholders, collaborate with IT architecture, and drive adoption of the developer platform. Requirements: 5+ years in IT product management or business analysis, experience with developer tools or internal platform products, strong stakeholder management, fluent German and English required.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "borderline-pass",
+        "notes": "IT Product Manager for internal developer tools — PM_SIGNAL would match if title had 'product manager'. Title contains 'it product manager' — 'it manager' is in WRONG_FUNCTION but PM_SIGNAL should override. Borderline positive: developer tools domain is a good match."
+      }
+    },
+    {
+      "id": "golden-081",
+      "source": "synthetic",
+      "title": "Product Owner — Core Banking",
+      "company": "DZ Bank",
+      "location": "Frankfurt, Germany (Hybrid)",
+      "job_description": "Product Owner — Core Banking. Frankfurt, Germany (Hybrid). DZ Bank is Germany's second largest bank and central institution for the Volksbanken Raiffeisenbanken cooperative banking group. We're looking for a Product Owner to drive the digital transformation of our core banking platform. You will manage the product backlog, write user stories, facilitate agile ceremonies, collaborate with business stakeholders and external vendors, and ensure on-time delivery of regulatory and business-driven features. Requirements: 4+ years as Product Owner in financial services, CSPO or equivalent certification, experience with banking regulation (PSD2, Basel III), fluent German required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "borderline-fail",
+        "notes": "Product Owner at a conservative bank — PM_SIGNAL matches 'product owner'. Passes all filters. LLM should score lower: it's a technical PO role in traditional banking, not the B2C/developer-tools domain. Heavily regulation-focused."
+      }
+    },
+    {
+      "id": "golden-082",
+      "source": "synthetic",
+      "title": "Product Strategist — Market Expansion",
+      "company": "Babbel",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Product Strategist — Market Expansion. Berlin, Germany (Hybrid). Babbel is the world's top-grossing language learning app. We're looking for a Product Strategist to define and execute our market expansion strategy for new geographies. You will conduct market analysis, define go-to-market approaches for new languages, collaborate with product and marketing teams, and define success metrics for expansion. This role sits between product and strategy. Requirements: 5+ years in product strategy, management consulting, or market development, strong quantitative and qualitative research skills, experience in consumer apps preferred, excellent English, German a plus.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "borderline-pass",
+        "notes": "Product Strategist — borderline positive. Passes all filters. B2C app domain matches well. LLM scoring will determine if it meets threshold."
+      }
+    },
+    {
+      "id": "golden-083",
+      "source": "synthetic",
+      "title": "Finance Business Partner — Technology Division",
+      "company": "Siemens",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Finance Business Partner — Technology Division. Munich, Germany (Hybrid). Siemens is looking for a Finance Business Partner to support the CFO of our Technology Division with financial planning, analysis, and decision support. You will own the monthly P&L review process, build business cases for major technology investments, track KPIs and variances, support the annual budgeting process, and partner with technology leaders on financial strategy. Requirements: 7+ years in financial controlling or business partnering, CPA or equivalent, strong financial modeling skills in Excel, experience in technology or industrial companies, fluent German and English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-other",
+        "notes": "Finance Business Partner — 'finance' is in WRONG_FUNCTION regex."
+      }
+    },
+    {
+      "id": "golden-084",
+      "source": "synthetic",
+      "title": "Talent Acquisition Manager — Tech",
+      "company": "Celonis",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Talent Acquisition Manager — Tech. Munich, Germany (Hybrid). Celonis is scaling fast. We're looking for a Talent Acquisition Manager to own recruiting for our product and engineering organization. You will source and assess senior product managers, software engineers, and data scientists, manage our ATS, build relationships with hiring managers, drive offer processes, and own reporting on hiring metrics. Requirements: 5+ years in technical recruiting or talent acquisition, experience hiring senior product and engineering talent, strong sourcing skills (LinkedIn Recruiter, Boolean search), familiarity with German labor law, fluent German and English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "wrong-function-other",
+        "notes": "HR/recruiting role — not caught by WRONG_FUNCTION regex. LLM should score low (recruiting, not PM)."
+      }
+    },
+    {
+      "id": "golden-085",
+      "source": "synthetic",
+      "title": "Legal Counsel — Commercial & Technology",
+      "company": "Personio",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Legal Counsel — Commercial & Technology. Munich, Germany (Hybrid). Personio is looking for a Legal Counsel to advise on commercial agreements, SaaS contracts, data protection, and technology matters. You will draft and negotiate customer contracts, advise on GDPR compliance, support M&A due diligence, handle IP matters, and collaborate with product and engineering on privacy-by-design. Requirements: German bar admission (Volljurist) required, 3+ years in-house or law firm experience in tech/commercial law, deep knowledge of GDPR, excellent German and English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-other",
+        "notes": "Legal Counsel — 'counsel' and 'legal' are in WRONG_FUNCTION regex."
+      }
+    },
+    {
+      "id": "golden-086",
+      "source": "synthetic",
+      "title": "Senior Financial Controller",
+      "company": "Zalando",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Senior Financial Controller. Berlin, Germany (Hybrid). Zalando is Europe's leading fashion platform. We're looking for a Senior Financial Controller to own the monthly financial close for our Technology segment, prepare management reporting, conduct variance analysis, build budgeting models, and support the annual audit. You will be a key partner to the CTO organization, translating technology spend into business insight. Requirements: 5+ years financial controlling, CPA or equivalent, expert Excel and SAP, fluent German and English, experience in e-commerce or technology preferred.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-other",
+        "notes": "Financial Controller — 'controller' is in WRONG_FUNCTION regex."
+      }
+    },
+    {
+      "id": "golden-087",
+      "source": "synthetic",
+      "title": "Compliance Manager — PSD2 & Open Banking",
+      "company": "N26",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Compliance Manager — PSD2 & Open Banking. Berlin, Germany (Hybrid). N26 is Europe's leading mobile bank. We're looking for a Compliance Manager to own regulatory compliance for our Open Banking and third-party provider integration programs. You will interpret PSD2 and EBA RTS requirements, assess product changes for compliance impact, liaise with BaFin, and develop internal policies. Requirements: 5+ years in financial services compliance, deep knowledge of PSD2, GDPR, and German banking regulation (KWG), German law degree or equivalent regulatory qualification preferred, fluent German and English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "wrong-function-other",
+        "notes": "Compliance Manager — not in WRONG_FUNCTION regex. LLM should score low (compliance, not PM). Slightly tricky since title contains 'Manager'."
+      }
+    },
+    {
+      "id": "golden-088",
+      "source": "synthetic",
+      "title": "Marketing Director — B2B SaaS",
+      "company": "Contentful",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Marketing Director — B2B SaaS. Berlin, Germany (Hybrid). Contentful is the leading content platform. We're looking for a Marketing Director to own demand generation, content marketing, and partner marketing for our European business. You will manage a team of 6 marketers, define the marketing strategy, own pipeline targets, run ABM campaigns, and partner with product marketing on launches. Requirements: 10+ years in B2B marketing, strong demand generation background, experience with marketing automation (Marketo, HubSpot), data-driven approach to campaign optimization, fluent English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "wrong-function-other",
+        "notes": "Marketing Director — not in WRONG_FUNCTION (neither 'marketing director' nor standalone marketing). LLM should score low."
+      }
+    },
+    {
+      "id": "golden-089",
+      "source": "synthetic",
+      "title": "Operations Manager — Supply Chain",
+      "company": "Zalando",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Operations Manager — Supply Chain. Berlin, Germany (Hybrid). Zalando operates logistics infrastructure for 50M+ customers across Europe. We're looking for an Operations Manager to optimize our supply chain processes across our 12 European fulfillment centers. You will manage capacity planning, drive efficiency initiatives, collaborate with technology teams on WMS improvements, and lead a team of 5 operations analysts. Requirements: 5+ years in supply chain or logistics operations management, experience with WMS or TMS systems, strong process improvement background (Lean/Six Sigma), fluent German and English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "wrong-function-other",
+        "notes": "Operations Manager — not in WRONG_FUNCTION but clearly not a PM role. LLM should score low."
+      }
+    },
+    {
+      "id": "golden-090",
+      "source": "synthetic",
+      "title": "Senior UX Designer — Product Design",
+      "company": "Miro",
+      "location": "Amsterdam, Netherlands (Hybrid) or Remote EU",
+      "job_description": "Senior UX Designer — Product Design. Amsterdam Hybrid or Remote EU. Miro is hiring a Senior UX Designer to shape the collaboration experience used by 70M+ users. You will own design for our real-time collaboration features, run user research, create prototypes, partner with product managers, and drive design quality across the squad. Requirements: 6+ years UX/product design, strong interaction design and visual design skills, experience with Figma, user research expertise, portfolio demonstrating complex product design in SaaS or collaboration tools, fluent English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "wrong-function-other",
+        "notes": "UX Designer — not caught by WRONG_FUNCTION. LLM should score low (design, not PM)."
+      }
+    },
+    {
+      "id": "golden-091",
+      "source": "synthetic",
+      "title": "Business Analyst — Digital Transformation",
+      "company": "BMW Group",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Business Analyst — Digital Transformation. Munich, Germany (Hybrid). BMW Group is looking for a Business Analyst to support digital transformation initiatives across our production and supply chain functions. You will elicit and document business requirements, map as-is and to-be processes, conduct gap analyses, facilitate workshops with stakeholders, and create functional specifications for IT implementations. Requirements: 4+ years business analysis, experience with process modeling (BPMN), familiarity with ERP systems (SAP), ability to bridge business and IT, fluent German and English required.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "llm-score-low",
+        "category": "wrong-function-other",
+        "notes": "Business Analyst — not in WRONG_FUNCTION regex. LLM should score low (BA, not PM, though there is overlap)."
+      }
+    },
+    {
+      "id": "golden-092",
+      "source": "synthetic",
+      "title": "IT Manager — Digital Workplace",
+      "company": "Siemens",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "IT Manager — Digital Workplace. Munich, Germany (Hybrid). Siemens is looking for an IT Manager to lead our Digital Workplace team responsible for Microsoft 365, collaboration tools, endpoint management, and IT support for 5,000 Munich-based employees. You will manage a team of 8 IT specialists, run IT projects, handle vendor relationships, manage the IT budget, and ensure service-level agreements are met. Requirements: 8+ years in IT management, deep Microsoft 365 expertise, experience managing IT teams, ITIL certification preferred, fluent German and English.",
+      "ground_truth": {
+        "should_pass": false,
+        "filter_expected": "wrong-function",
+        "category": "wrong-function-other",
+        "notes": "IT Manager — 'it manager' is in WRONG_FUNCTION regex."
+      }
+    },
+    {
+      "id": "golden-093",
+      "source": "synthetic",
+      "title": "Senior Product Manager — Checkout & Payments",
+      "company": "SumUp",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Senior Product Manager — Checkout & Payments. Berlin, Germany (Hybrid). SumUp powers payments for 4M+ merchants worldwide. We're looking for a Senior PM to own the checkout and payment flow — the most critical touchpoint in the merchant and customer experience. You will define the roadmap for new payment methods, improve conversion through continuous discovery, partner with engineering and compliance, and drive our checkout success rate. What you bring: 6+ years product management, experience with payments or fintech products, strong analytical skills, ability to navigate regulatory requirements, excellent written communication.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — Senior PM in fintech/payments, Berlin hybrid."
+      }
+    },
+    {
+      "id": "golden-094",
+      "source": "synthetic",
+      "title": "Senior Product Manager — B2C Subscription",
+      "company": "Headspace",
+      "location": "Remote (Europe)",
+      "job_description": "Senior Product Manager — B2C Subscription. Remote Europe. Headspace is a global leader in mental wellness, helping millions of people sleep better, stress less, and be more mindful. We're looking for a Senior PM to own our subscription experience — the pricing, packaging, trial funnel, and renewal flow that drives our business. You will run continuous discovery with subscribers, define A/B tests, collaborate with engineering and data science, and improve subscriber lifetime value. What you bring: 6+ years in product management with subscription or monetization focus, strong data-driven approach, experience with consumer apps, excellent English, EU timezone required.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — B2C subscription PM, remote EU. Matches candidate background well."
+      }
+    },
+    {
+      "id": "golden-095",
+      "source": "synthetic",
+      "title": "Group Product Manager — Enterprise Platform",
+      "company": "Celonis",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Group Product Manager — Enterprise Platform. Munich, Germany (Hybrid). Celonis is the global leader in Process Intelligence. We're looking for a Group PM to lead our enterprise platform squad — the APIs, integrations, and administration features used by our largest Fortune 500 customers. You will manage 2 PM reports, define the platform roadmap, conduct discovery with enterprise IT leaders, and align with engineering and pre-sales on technical requirements. What you bring: 9+ years product management, experience with enterprise SaaS platforms, ability to engage both technical and business stakeholders, excellent written and verbal communication, fluent English required.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — Group PM, enterprise platform, Munich hybrid."
+      }
+    },
+    {
+      "id": "golden-096",
+      "source": "synthetic",
+      "title": "Director of Product Management — B2B Platform",
+      "company": "Personio",
+      "location": "Munich, Germany (Hybrid)",
+      "job_description": "Director of Product Management — B2B Platform. Munich, Germany (Hybrid). Personio is the leading HR software for European SMEs, serving 14,000+ customers. We're looking for a Director of PM to lead our Platform domain — the APIs, integrations, and workflow automation features that let customers and partners build on top of Personio. You will manage a team of 4 PMs, define the 3-year platform vision, own the integration marketplace roadmap, and collaborate with engineering leadership. What you bring: 10+ years product management with at least 3 years leading PM teams, deep experience with B2B SaaS platforms or API products, excellent leadership and communication skills, fluent German preferred.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — Director of Product, B2B platform, Munich hybrid."
+      }
+    },
+    {
+      "id": "golden-097",
+      "source": "synthetic",
+      "title": "Principal Product Manager — AI & Automation",
+      "company": "Zapier",
+      "location": "Remote (Europe)",
+      "job_description": "Principal Product Manager — AI & Automation. Remote Europe. Zapier helps millions of people automate work across 6,000+ apps. We're looking for a Principal PM to define the next generation of AI-powered automation for Zapier. You will own the AI product roadmap, conduct continuous discovery with power users, collaborate with our ML team, define the north star for AI agents in Zapier, and drive adoption metrics. What you bring: 9+ years product management, experience with AI/ML product features, strong user research background including Jobs-to-be-Done methodology, excellent async written communication for our remote-first culture, EU timezone required.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — Principal PM, AI/automation, remote EU. Matches candidate's continuous discovery and B2D expertise."
+      }
+    },
+    {
+      "id": "golden-098",
+      "source": "synthetic",
+      "title": "Senior Product Manager — Core Experience",
+      "company": "Duolingo",
+      "location": "Remote (Europe, Munich preferred)",
+      "job_description": "Senior Product Manager — Core Experience. Remote Europe (Munich preferred). Duolingo has 100M+ active learners. We're looking for a Senior PM to own the daily practice experience — the lessons, streaks, and gamification that drives our industry-leading retention. You will partner with ML engineers on personalized learning paths, run continuous discovery with learners, iterate on core engagement loops, and drive DAU and streak metrics. What you bring: 7+ years product management in consumer apps, deep understanding of engagement and habit formation, experience running experiments at scale, passion for education or language learning, excellent English, German a plus.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — B2C consumer app PM, remote EU with Munich preference. Excellent match."
+      }
+    },
+    {
+      "id": "golden-099",
+      "source": "synthetic",
+      "title": "Head of Product — Developer Tools",
+      "company": "GitLab",
+      "location": "Remote (Europe)",
+      "job_description": "Head of Product — Developer Tools. Remote Europe. GitLab is the DevSecOps platform used by 30M+ developers. We're looking for a Head of Product to lead our Developer Tools stage — the IDE extensions, CLI, and local development experience across all GitLab products. You will manage a team of 4 PMs, define the developer tooling strategy, engage with our open-source community, conduct discovery with enterprise engineering teams, and influence the technical roadmap. What you bring: 10+ years product management with 3+ years in a leadership role, deep expertise in developer tools or developer experience, excellent written communication for async-first culture, ability to engage credibly with developers.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — Head of Product, developer tools, remote EU. Excellent match for candidate's developer tools background."
+      }
+    },
+    {
+      "id": "golden-100",
+      "source": "synthetic",
+      "title": "Senior Product Manager — Data Products",
+      "company": "Adjust",
+      "location": "Berlin, Germany (Hybrid)",
+      "job_description": "Senior Product Manager — Data Products. Berlin, Germany (Hybrid). Adjust is the world's leading mobile measurement and analytics platform, trusted by thousands of apps. We're looking for a Senior PM to own our data and analytics products — the dashboards, reports, and data pipelines that help mobile marketers measure and optimize their campaigns. You will define the roadmap for data visualization features, conduct discovery with CMOs and growth marketers, collaborate with data engineering, and drive product-led growth. What you bring: 6+ years product management, experience with data or analytics products, strong user research skills, ability to translate complex data concepts into intuitive UX, excellent English.",
+      "ground_truth": {
+        "should_pass": true,
+        "filter_expected": null,
+        "category": "pm-positive",
+        "notes": "Strong positive — Senior PM, data/analytics products, Berlin hybrid. Good match."
+      }
+    }
+  ]
+}

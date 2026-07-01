@@ -1,7 +1,8 @@
-import { writeFileSync } from 'fs'
+import { writeFileSync, readFileSync } from 'fs'
 import { join } from 'path'
-import { getDb } from '../db'
-import { getConfig } from '../config'
+import { getDb } from '../db/index.ts'
+import { getConfig } from '../config.ts'
+import { applyPreFilters, makeLocationChecker } from '../search/filters.ts'
 
 export interface EvalJob {
   id: number
@@ -81,4 +82,125 @@ export function exportEvalData(count: number, outputPath?: string): string {
   writeFileSync(filePath, JSON.stringify(evalExport, null, 2), 'utf-8')
 
   return filePath
+}
+
+export interface GoldenGroundTruth {
+  should_pass: boolean
+  filter_expected: string | null
+  category: string
+  notes: string
+}
+
+export interface GoldenJob {
+  id: string
+  source: string
+  title: string
+  company: string
+  location: string
+  job_description: string
+  ground_truth: GoldenGroundTruth
+}
+
+export interface GoldenFilterResult {
+  id: string
+  title: string
+  company: string
+  filter_result: string
+  expected_should_pass: boolean
+  actual_should_pass: boolean
+  correct: boolean
+  filter_expected: string | null
+  category: string
+  notes: string
+}
+
+export function evaluateGoldenFilters(outputPath?: string): { filePath: string; report: string } {
+  const db = getDb()
+  const prefs = db.prepare('SELECT * FROM job_preferences WHERE id = 1').get() as Record<string, unknown>
+  const profile = db.prepare('SELECT * FROM profile WHERE id = 1').get() as Record<string, unknown>
+
+  const locationType = String(prefs.location_type || 'Remote, hybrid').toLowerCase()
+  const homeCity = String(profile.location || '').toLowerCase().split(',')[0].trim()
+  const locationAccepted = makeLocationChecker(
+    locationType.includes('remote'),
+    locationType.includes('hybrid'),
+    homeCity
+  )
+
+  const datasetPath = join(process.cwd(), 'eval-golden.json')
+  const dataset = JSON.parse(readFileSync(datasetPath, 'utf-8')) as { jobs: GoldenJob[] }
+
+  const results: GoldenFilterResult[] = dataset.jobs.map((job) => {
+    const filterResult = applyPreFilters(job.title, job.job_description, job.location, locationAccepted)
+    const actualShouldPass = filterResult === 'pass'
+    const expectedShouldPass = job.ground_truth.should_pass
+
+    // For golden entries that should reach LLM (filter_expected is null or 'llm-score-low'),
+    // the filter pipeline should return 'pass' — the LLM decides the final score.
+    // For 'llm-score-low', filter passes but LLM scores below threshold.
+    const filterLevelExpectedPass = job.ground_truth.filter_expected === null || job.ground_truth.filter_expected === 'llm-score-low'
+
+    return {
+      id: job.id,
+      title: job.title,
+      company: job.company,
+      filter_result: filterResult,
+      expected_should_pass: expectedShouldPass,
+      actual_should_pass: actualShouldPass,
+      correct: actualShouldPass === filterLevelExpectedPass,
+      filter_expected: job.ground_truth.filter_expected,
+      category: job.ground_truth.category,
+      notes: job.ground_truth.notes,
+    }
+  })
+
+  // Summary by filter
+  const total = results.length
+  const correct = results.filter((r) => r.correct).length
+  const wrong = results.filter((r) => !r.correct)
+
+  const byFilter: Record<string, { total: number; correct: number }> = {}
+  for (const r of results) {
+    const key = r.filter_expected || 'pass-to-llm'
+    if (!byFilter[key]) byFilter[key] = { total: 0, correct: 0 }
+    byFilter[key].total++
+    if (r.correct) byFilter[key].correct++
+  }
+
+  const lines: string[] = [
+    `Golden Filter Accuracy Report`,
+    `Evaluated: ${new Date().toISOString()}`,
+    ``,
+    `Overall: ${correct}/${total} correct (${Math.round(correct / total * 100)}%)`,
+    ``,
+    `By expected outcome:`,
+  ]
+  for (const [key, counts] of Object.entries(byFilter).sort()) {
+    lines.push(`  ${key.padEnd(20)} ${counts.correct}/${counts.total} correct`)
+  }
+
+  if (wrong.length > 0) {
+    lines.push(``, `Misclassified entries:`)
+    for (const r of wrong) {
+      lines.push(`  [${r.id}] ${r.title} @ ${r.company}`)
+      lines.push(`    Expected: filter=${r.filter_expected ?? 'none'}, should_pass=${r.expected_should_pass}`)
+      lines.push(`    Got:      filter=${r.filter_result}, passes=${r.actual_should_pass}`)
+    }
+  } else {
+    lines.push(``, `All entries correctly classified by pre-filters!`)
+  }
+
+  const report = lines.join('\n')
+  const exportData = {
+    evaluated_at: new Date().toISOString(),
+    accuracy: { correct, total, pct: Math.round(correct / total * 100) },
+    by_filter: byFilter,
+    misclassified: wrong,
+    all_results: results,
+  }
+
+  const filePath = outputPath || join(process.cwd(), 'eval-golden-results.json')
+  writeFileSync(filePath, JSON.stringify(exportData, null, 2), 'utf-8')
+
+  return { filePath, report }
 }

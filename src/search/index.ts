@@ -5,6 +5,7 @@ import { searchLinkedIn, LinkedInError } from '../services/linkedin'
 import { scrapeCompanyCareerPage } from '../services/company-scraper'
 import { searchJobBoards } from '../services/job-boards'
 import { generateCVPdf, CVData } from '../services/cv-generator'
+import { TOO_JUNIOR, WRONG_FUNCTION, PM_SIGNAL, isJobPosting, makeLocationChecker } from './filters'
 
 interface SearchSummary {
   totalFound: number
@@ -115,50 +116,13 @@ export async function runSearch(): Promise<SearchSummary> {
   // --- Score and queue new results ---
   const newJobs = db.prepare(`SELECT * FROM job_results WHERE search_run_id = ? AND status = 'new'`).all(runId) as Array<Record<string, unknown>>
 
-  const TOO_JUNIOR = /\b(intern|internship|entry.?level|junior|graduate|trainee|apprentice|student|early.?career)\b/i
-
-  // Titles that clearly belong to a different job function — not PM/product leadership
-  const WRONG_FUNCTION = /\b(engineer|engineering|developer|devops|sre|security|cloud|backend|frontend|fullstack|full.?stack|firmware|hardware|soc|chip|calibrat|assembly|technician|lawyer|jurist|counsel|legal|accounting|accountant|revenue accounting|controller|finance|audit|sales director|sales manager|account executive|account manager|business development|field engineer|solutions engineer|customer success|customer support|it director|it manager|business systems|revenue operations|revops)\b/i
-  // But if the title also contains PM/product/lead keywords, let it through (e.g. "Product Manager, Cloud Platform")
-  const PM_SIGNAL = /\b(product manager|product lead|product owner|head of product|vp of product|director of product|group pm|principal pm|chief product|cpo|program manager|technical pm|product strategy)\b/i
-
   const languages: Array<{ language: string; proficiency: string }> = JSON.parse(profile.languages || '[]')
   const locationType = String(prefs.location_type || 'Remote, hybrid').toLowerCase()
   const acceptsRemote = locationType.includes('remote')
   const acceptsHybrid = locationType.includes('hybrid')
-  const homeCity = String(profile.location || '').toLowerCase().split(',')[0].trim() // "munich"
-  const homeCountry = 'germany'
+  const homeCity = String(profile.location || '').toLowerCase().split(',')[0].trim()
 
-  // Locations that signal a role outside EU / candidate's reach
-  const NON_EU_LOCATION = /\b(united states|usa|\bU\.S\.?\b|california|new york|san francisco|seattle|austin|boston|chicago|los angeles|texas|florida|washington d\.?c|virginia|colorado|arizona|utah|wyoming|new mexico|oregon|illinois|georgia|ohio|pennsylvania|michigan|north carolina|south carolina|new jersey|connecticut|massachusetts|maryland|nevada|minnesota|wisconsin|missouri|indiana|alabama|tennessee|kentucky|oklahoma|louisiana|arkansas|mississippi|kansas|iowa|nebraska|south dakota|north dakota|idaho|montana|alaska|hawaii|singapore|tokyo|japan|sydney|australia|canada|toronto|vancouver|india|bangalore|hyderabad|brazil|mexico|china|beijing|shanghai|dubai|uae|south korea|seoul)\b/i
-
-  function locationAccepted(jobLocationRaw: string, descriptionRaw: string): boolean {
-    const loc = jobLocationRaw.toLowerCase()
-    // Check location field + first 500 chars of description for non-EU signals
-    const locAndOpening = (loc + ' ' + descriptionRaw.substring(0, 500)).toLowerCase()
-    if (NON_EU_LOCATION.test(locAndOpening)) return false
-
-    const combined = (loc + ' ' + descriptionRaw.substring(0, 2000)).toLowerCase()
-    // Accept remote or hybrid
-    if (acceptsRemote && /\bremote\b/.test(combined)) return true
-    if (acceptsHybrid && /\bhybrid\b/.test(combined)) return true
-    // Accept on-site in candidate's city or country
-    if (homeCity && combined.includes(homeCity)) return true
-    if (combined.includes(homeCountry)) return true
-    // Blank location with no red flags — let LLM decide
-    if (!jobLocationRaw.trim()) return true
-    return false
-  }
-
-  function isJobPosting(title: string, description: string): boolean {
-    const t = title.toLowerCase()
-    const d = description.toLowerCase().substring(0, 1000)
-    // Obvious non-job page patterns in the title
-    if (/^(blog|home|search jobs|jobs?$|engineering$|careers?$|spotlight|rovo|newsletter|about|news|press|analyst reports?|leadership|products?$|platform$|security$|pricing$|ai agent)/i.test(title.trim())) return false
-    // Must have at least one job-posting marker in the description
-    const markers = ['responsibilit', 'requirement', 'qualif', 'apply', 'we are looking', 'you will', 'your role', 'what you', 'job description', 'about the role', 'we\'re looking', 'the opportunity', 'who you are', 'what we\'re looking']
-    return markers.some((m) => t.includes(m) || d.includes(m))
-  }
+  const locationAccepted = makeLocationChecker(acceptsRemote, acceptsHybrid, homeCity)
 
   for (const job of newJobs) {
     const titleStr = String(job.title)
