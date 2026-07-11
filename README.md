@@ -2,7 +2,7 @@
 
 A local job-search agent that automates your job search end-to-end — it imports your CV, builds a comprehensive professional profile, runs scheduled searches on LinkedIn and company career pages, uses an LLM to score matches and tailor your CV per posting, and submits applications after you review and approve each one.
 
-**All data stays on your machine. No cloud required (optional Claude API, OpenRouter, or local Ollama).**
+**All your data stays on your machine.** LLM inference runs on your Claude Pro/Max **subscription** (via Claude Code — no API bill), OpenRouter, the Claude API, or a fully-local Ollama model.
 
 ---
 
@@ -53,18 +53,16 @@ npx playwright install chromium
 cp config.example.json config.json
 ```
 
-Edit `config.json`:
+Edit `config.json` (see [`config.example.json`](config.example.json) for the full template):
 
 ```json
 {
   "llm": {
-    "provider": "claude",
-    "claudeApiKey": "sk-ant-...",
-    "model": "claude-sonnet-4-6",
-    "ollamaBaseUrl": "http://localhost:11434",
-    "ollamaModel": "llama3.2",
-    "openrouterApiKey": "",
-    "openrouterBaseUrl": "https://openrouter.ai/api/v1",
+    "provider": "claude-cli",
+    "fallbackProvider": "openrouter",
+    "claudeCliCommand": "claude",
+    "claudeCliModel": "claude-haiku-4-5",
+    "openrouterApiKey": "sk-or-...",
     "openrouterRatingModel": "openai/gpt-oss-120b:free",
     "openrouterTailoringModel": "openai/gpt-oss-120b:free"
   },
@@ -82,6 +80,10 @@ Edit `config.json`:
   "reviewPort": 3000
 }
 ```
+
+The default above runs the LLM on your **Claude Pro/Max subscription** via Claude Code,
+falling back to OpenRouter free models if it's unavailable. To use a different provider
+instead, see [LLM Configuration](#llm-configuration) below.
 
 > `config.json` is gitignored — your credentials never leave your machine.
 
@@ -104,6 +106,7 @@ npx tsx agent.ts <command>
 | `start` | Start scheduler + review UI together (normal daily use) |
 | `eval` | Export last N scored jobs to `eval-input.json` for LLM-as-judge review |
 | `eval --golden` | Run pre-filter accuracy check against the built-in 100-job golden dataset |
+| `eval --golden-scoring` | Score the golden entries with your configured LLM and compare to ground truth (makes real LLM calls) |
 
 ### First-time setup
 
@@ -163,6 +166,20 @@ The golden dataset covers:
 - **Real failures** — 20 entries from an actual production search, including the worst false positives
 
 Use `--golden` after changing the pre-filter regexes in `src/search/filters.ts` to verify you haven't broken anything.
+
+### Golden LLM scoring (measure a model)
+
+```bash
+npx tsx agent.ts eval --golden-scoring
+```
+
+Where `--golden` tests only the pre-filters, `--golden-scoring` runs the golden
+entries that *reach the LLM* through your **configured provider** (`scoreJobRelevance`),
+then compares each score against `ground_truth` (score ≥ `fitScoreThreshold` should
+pass). It prints overall accuracy split by direction (should-pass vs should-score-low)
+and writes full results to `eval-golden-scoring-results.json`. Use it to pick the best
+model per task rather than guessing — it makes real LLM calls, so it counts against your
+provider's rate/usage limits, and runs sequentially to stay under free-tier caps.
 
 ---
 
@@ -273,7 +290,7 @@ LinkedIn's Terms of Service prohibit automated access. The agent mimics human br
 |---|---|
 | Runtime | Node.js + TypeScript (tsx, no build step) |
 | Database | SQLite (better-sqlite3) |
-| LLM | Claude API, OpenRouter, or Ollama (configurable) |
+| LLM | Claude Code (subscription), Claude API, OpenRouter, or Ollama — with automatic fallback |
 | Job search | Playwright (Chromium) |
 | Auto-apply | Playwright form automation |
 | PDF generation | Playwright `page.pdf()` |

@@ -8,6 +8,8 @@
  *   review          Start the review UI at localhost:3000
  *   start           Start scheduler + review UI together (normal daily use)
  *   eval [--count N] [--out file]  Export scored jobs for Claude-as-judge eval
+ *   eval --golden                  Pre-filter accuracy vs the golden dataset
+ *   eval --golden-scoring          LLM scoring accuracy vs the golden dataset (real calls)
  */
 
 const command = process.argv[2]
@@ -79,17 +81,26 @@ function runStartCmd(): void {
 }
 
 async function runEvalCmd(): Promise<void> {
-  const { exportEvalData, evaluateGoldenFilters } = await import('./src/eval/index.ts')
+  const { exportEvalData, evaluateGoldenFilters, evaluateGoldenScoring } = await import('./src/eval/index.ts')
   const args = process.argv.slice(3)
   const outIdx = args.indexOf('--out')
   const outPath = outIdx !== -1 ? args[outIdx + 1] : undefined
+
+  if (args.includes('--golden-scoring')) {
+    // Scores every golden entry that reaches the LLM through the configured
+    // provider and compares against ground truth. Makes real LLM calls.
+    const { filePath, report } = await evaluateGoldenScoring(outPath)
+    console.log(`\n${report}`)
+    console.log(`\nFull results written to: ${filePath}`)
+    process.exit(0)
+  }
 
   if (args.includes('--golden')) {
     const { filePath, report } = evaluateGoldenFilters(outPath)
     console.log(`\n${report}`)
     console.log(`\nFull results written to: ${filePath}`)
-    console.log(`\nTo evaluate LLM scoring on golden entries that pass filters, open your Claude Code session and say:`)
-    console.log(`  "Run golden LLM eval on eval-golden-results.json"`)
+    console.log(`\nTo score the golden entries that pass filters with your configured LLM, run:`)
+    console.log(`  npx tsx agent.ts eval --golden-scoring`)
     process.exit(0)
   }
 
@@ -131,7 +142,8 @@ Commands:
   start            Start the scheduler + review UI (normal daily use).
   eval             Export scored jobs for Claude-as-judge evaluation.
                    Options: --count N (default 50), --out path/to/file.json
-           --golden  Run pre-filter accuracy check against the 100-job golden dataset.
+                   --golden           Pre-filter accuracy check against the 100-job golden dataset.
+                   --golden-scoring   Score golden entries with the configured LLM (real calls) vs ground truth.
 
 Examples:
   node agent.ts profile my-cv.pdf
