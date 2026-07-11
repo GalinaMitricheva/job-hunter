@@ -1,9 +1,14 @@
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 
+export type LlmProvider = 'claude' | 'ollama' | 'openrouter' | 'claude-cli'
+
 export interface AppConfig {
   llm: {
-    provider: 'claude' | 'ollama' | 'openrouter'
+    provider: LlmProvider
+    // When the primary provider errors (throttling, CLI failure, network),
+    // retry the call once on this provider. Empty string disables fallback.
+    fallbackProvider: LlmProvider | ''
     claudeApiKey: string
     model: string
     ollamaBaseUrl: string
@@ -14,6 +19,10 @@ export interface AppConfig {
     openrouterBaseUrl: string
     openrouterRatingModel: string
     openrouterTailoringModel: string
+    // Headless Claude Code — runs on your Claude Pro/Max subscription (not the
+    // paid API). Requires Claude Code installed and logged in on this machine.
+    claudeCliCommand: string
+    claudeCliModel: string
   }
   search: {
     schedule: string

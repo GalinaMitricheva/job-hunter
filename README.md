@@ -29,9 +29,10 @@ A local job-search agent that automates your job search end-to-end — it import
 |---|---|---|
 | **Node.js 20+** | Runs the agent | https://nodejs.org |
 | **Playwright Chromium** | LinkedIn scraping + auto-apply | `npx playwright install chromium` |
-| **Claude API key** *(or OpenRouter / Ollama)* | LLM for scoring and tailoring | Set `ANTHROPIC_API_KEY` env var |
-| **OpenRouter API key** *(alternative to Claude)* | Hosted free/cheap models for rating + CV tailoring | https://openrouter.ai/keys |
-| **Ollama** *(alternative to Claude)* | Local LLM option — not required if using Claude or OpenRouter | https://ollama.com |
+| **Claude Code** *(recommended)* | Runs scoring + tailoring on your Claude Pro/Max **subscription** (no API bill) | `npm i -g @anthropic-ai/claude-code`, then `claude` and log in |
+| **OpenRouter API key** *(free fallback)* | Hosted free/cheap models when Claude Code is throttled/unavailable | https://openrouter.ai/keys |
+| **Claude API key** *(alternative)* | Pay-per-token LLM access | Set `ANTHROPIC_API_KEY` env var |
+| **Ollama** *(alternative)* | Local LLM option — not required if using Claude Code or OpenRouter | https://ollama.com |
 
 ---
 
@@ -179,9 +180,34 @@ Open `http://localhost:3000` in your browser after starting the agent.
 
 ## LLM Configuration
 
-Switch providers with the `llm.provider` field in `config.json`:
+Switch providers with the `llm.provider` field in `config.json`. If a call to
+the primary provider fails (throttling, CLI error, network), the agent
+automatically retries it once on `llm.fallbackProvider` before giving up.
 
-**Claude (recommended):**
+**Claude Code — subscription, no API bill (recommended):**
+```json
+"llm": {
+  "provider": "claude-cli",
+  "fallbackProvider": "openrouter",
+  "claudeCliCommand": "claude",
+  "claudeCliModel": "claude-haiku-4-5"
+}
+```
+
+This runs rating and tailoring through **headless Claude Code** (`claude -p`),
+which authenticates with your **Claude Pro/Max subscription** — far higher
+quality than local/free models, with no per-token API charge. Setup:
+
+1. `npm i -g @anthropic-ai/claude-code`
+2. Run `claude` once and log in, choosing your **subscription** account (not an API key).
+3. Ensure **`ANTHROPIC_API_KEY` is _not_ set** in the environment that runs the agent — if it is, Claude Code bills the paid API instead of your subscription. (The agent also strips it from the CLI's environment as a safeguard.)
+
+Notes:
+- Subject to Claude Code's usage limits (rolling 5-hour + weekly caps). The pre-filters keep LLM volume low, so a scheduled run is normally fine; if a call is throttled it falls back to `fallbackProvider`.
+- Use `claudeCliModel` to pick the model (`claude-haiku-4-5` is cheap and strong; use a Sonnet model for higher-quality tailoring).
+- `claudeCliCommand` lets you point at a specific binary/path (e.g. `claude.cmd` on Windows) if `claude` isn't on PATH.
+
+**Claude API (pay-per-token):**
 ```json
 "llm": { "provider": "claude", "claudeApiKey": "sk-ant-...", "model": "claude-sonnet-4-6" }
 ```

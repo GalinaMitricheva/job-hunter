@@ -1,10 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { request as httpRequest } from 'http'
 import { request as httpsRequest } from 'https'
-import { getConfig } from '../config'
+import { spawn } from 'child_process'
+import { getConfig, type LlmProvider } from '../config'
 
 // Some tasks (rating, tailoring) may want a different model than others.
-// Only the OpenRouter provider varies its model by task; claude/ollama ignore it.
+// Only the OpenRouter provider varies its model by task; other providers ignore it.
 export type LlmTask = 'rating' | 'tailoring'
 
 export interface LlmOptions {
@@ -13,16 +14,36 @@ export interface LlmOptions {
 
 export async function llmComplete(prompt: string, system?: string, opts?: LlmOptions): Promise<string> {
   const cfg = getConfig()
-  if (cfg.llm.provider === 'claude') {
-    return claudeComplete(prompt, system, cfg.llm.model)
+  try {
+    return await callProvider(cfg.llm.provider, prompt, system, opts)
+  } catch (err) {
+    const fallback = cfg.llm.fallbackProvider
+    if (fallback && fallback !== cfg.llm.provider) {
+      console.warn(`[llm] ${cfg.llm.provider} failed (${(err as Error).message.slice(0, 140)}); falling back to ${fallback}`)
+      return await callProvider(fallback, prompt, system, opts)
+    }
+    throw err
   }
-  if (cfg.llm.provider === 'openrouter') {
-    const model = opts?.task === 'tailoring'
-      ? (cfg.llm.openrouterTailoringModel || cfg.llm.openrouterRatingModel)
-      : (cfg.llm.openrouterRatingModel || cfg.llm.openrouterTailoringModel)
-    return openrouterComplete(prompt, system, cfg.llm.openrouterBaseUrl, cfg.llm.openrouterApiKey, model)
+}
+
+function callProvider(provider: LlmProvider, prompt: string, system: string | undefined, opts?: LlmOptions): Promise<string> {
+  const cfg = getConfig()
+  switch (provider) {
+    case 'claude':
+      return claudeComplete(prompt, system, cfg.llm.model)
+    case 'claude-cli':
+      return claudeCliComplete(prompt, system, cfg.llm.claudeCliCommand || 'claude', cfg.llm.claudeCliModel)
+    case 'openrouter': {
+      const model = opts?.task === 'tailoring'
+        ? (cfg.llm.openrouterTailoringModel || cfg.llm.openrouterRatingModel)
+        : (cfg.llm.openrouterRatingModel || cfg.llm.openrouterTailoringModel)
+      return openrouterComplete(prompt, system, cfg.llm.openrouterBaseUrl, cfg.llm.openrouterApiKey, model)
+    }
+    case 'ollama':
+      return ollamaComplete(prompt, system, cfg.llm.ollamaBaseUrl, cfg.llm.ollamaModel, cfg.llm.ollamaTimeoutSec ?? 600)
+    default:
+      return Promise.reject(new Error(`Unknown LLM provider: ${provider}`))
   }
-  return ollamaComplete(prompt, system, cfg.llm.ollamaBaseUrl, cfg.llm.ollamaModel, cfg.llm.ollamaTimeoutSec ?? 600)
 }
 
 async function claudeComplete(prompt: string, system: string | undefined, model: string): Promise<string> {
@@ -37,6 +58,73 @@ async function claudeComplete(prompt: string, system: string | undefined, model:
   })
   const block = msg.content[0]
   return block.type === 'text' ? block.text : ''
+}
+
+// Runs a prompt through headless Claude Code (`claude -p`), which authenticates
+// with the user's Claude Pro/Max subscription rather than the paid API. The
+// prompt (and any system text) go via stdin to avoid command-line length and
+// quoting limits — especially important on Windows. ANTHROPIC_API_KEY is
+// stripped from the child env so the CLI uses the subscription, not API billing.
+function claudeCliComplete(
+  prompt: string,
+  system: string | undefined,
+  command: string,
+  model: string,
+  timeoutSec = 120
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const args = ['-p', '--output-format', 'json', '--max-turns', '1']
+    if (model) args.push('--model', model)
+
+    const childEnv = { ...process.env }
+    delete childEnv.ANTHROPIC_API_KEY
+
+    const child = spawn(command, args, {
+      env: childEnv,
+      // Windows resolves `claude.cmd`/shims only through a shell. All args here
+      // are simple flag tokens (no user text), so this is safe from injection.
+      shell: process.platform === 'win32',
+    })
+
+    let out = ''
+    let errOut = ''
+    let settled = false
+    const finish = (fn: () => void) => { if (!settled) { settled = true; clearTimeout(timer); fn() } }
+
+    const timer = setTimeout(() => {
+      child.kill()
+      finish(() => reject(new Error(`Claude CLI timed out after ${timeoutSec}s`)))
+    }, timeoutSec * 1000)
+
+    child.stdout.on('data', (d: Buffer) => { out += d.toString() })
+    child.stderr.on('data', (d: Buffer) => { errOut += d.toString() })
+
+    child.on('error', (e) => finish(() =>
+      reject(new Error(`Failed to launch Claude CLI '${command}': ${e.message}. Is Claude Code installed and on PATH?`))
+    ))
+
+    child.on('close', (code) => finish(() => {
+      if (code !== 0) {
+        reject(new Error(`Claude CLI exited ${code}: ${(errOut || out).slice(0, 300)}`))
+        return
+      }
+      try {
+        // `--output-format json` yields a result envelope: { type, subtype, is_error, result, ... }
+        const env = JSON.parse(out) as { is_error?: boolean; subtype?: string; result?: string }
+        if (env.is_error || typeof env.result !== 'string') {
+          reject(new Error(`Claude CLI error (${env.subtype ?? 'unknown'}): ${String(env.result ?? '').slice(0, 200)}`))
+          return
+        }
+        resolve(env.result)
+      } catch (e) {
+        reject(new Error(`Could not parse Claude CLI output: ${(e as Error).message}\n${out.slice(0, 200)}`))
+      }
+    }))
+
+    child.stdin.on('error', () => { /* ignore EPIPE if the child exits early */ })
+    child.stdin.write(system ? `${system}\n\n${prompt}` : prompt)
+    child.stdin.end()
+  })
 }
 
 function ollamaComplete(

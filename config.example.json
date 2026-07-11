@@ -1,6 +1,7 @@
 {
   "llm": {
-    "provider": "claude",
+    "provider": "claude-cli",
+    "fallbackProvider": "openrouter",
     "claudeApiKey": "",
     "model": "claude-sonnet-4-6",
     "ollamaBaseUrl": "http://localhost:11434",
@@ -9,7 +10,9 @@
     "openrouterApiKey": "",
     "openrouterBaseUrl": "https://openrouter.ai/api/v1",
     "openrouterRatingModel": "openai/gpt-oss-120b:free",
-    "openrouterTailoringModel": "openai/gpt-oss-120b:free"
+    "openrouterTailoringModel": "openai/gpt-oss-120b:free",
+    "claudeCliCommand": "claude",
+    "claudeCliModel": "claude-haiku-4-5"
   },
   "search": {
     "schedule": "0 8 * * *",
