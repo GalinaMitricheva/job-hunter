@@ -73,7 +73,7 @@ function claudeCliComplete(
   timeoutSec = 120
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const args = ['-p', '--output-format', 'json', '--max-turns', '1']
+    const args = ['-p', '--output-format', 'json']
     if (model) args.push('--model', model)
 
     const childEnv = { ...process.env }
