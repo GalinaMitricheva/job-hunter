@@ -3,6 +3,7 @@ import { join } from 'path'
 import { getDb } from '../db/index.ts'
 import { getConfig } from '../config.ts'
 import { applyPreFilters, makeLocationChecker } from '../search/filters.ts'
+import { scoreJobRelevance } from '../llm/index.ts'
 
 export interface EvalJob {
   id: number
@@ -200,6 +201,114 @@ export function evaluateGoldenFilters(outputPath?: string): { filePath: string; 
   }
 
   const filePath = outputPath || join(process.cwd(), 'eval-golden-results.json')
+  writeFileSync(filePath, JSON.stringify(exportData, null, 2), 'utf-8')
+
+  return { filePath, report }
+}
+
+export interface GoldenScoringResult {
+  id: string
+  title: string
+  company: string
+  category: string
+  score: number
+  reasoning: string
+  expected_pass: boolean
+  actual_pass: boolean
+  correct: boolean
+}
+
+/**
+ * Scores every golden job that is meant to reach the LLM (pre-filter verdict
+ * null or 'llm-score-low') through the configured LLM provider, then compares
+ * score >= fitScoreThreshold against ground_truth.should_pass. Unlike
+ * evaluateGoldenFilters (which only exercises the pre-filters), this makes real
+ * LLM calls, so it measures a specific model's scoring quality — use it to pick
+ * the OpenRouter default. Runs sequentially to stay under free-tier rate limits.
+ */
+export async function evaluateGoldenScoring(outputPath?: string): Promise<{ filePath: string; report: string }> {
+  const db = getDb()
+  const profile = db.prepare('SELECT * FROM profile WHERE id = 1').get() as Record<string, unknown>
+  const prefs = db.prepare('SELECT * FROM job_preferences WHERE id = 1').get() as Record<string, unknown>
+  const skills = db.prepare('SELECT name FROM skills ORDER BY sort_order').all() as Array<{ name: string }>
+  const work = db.prepare('SELECT title, company, start_date, end_date FROM work_experience ORDER BY sort_order').all() as Array<Record<string, unknown>>
+
+  const threshold = getConfig().search.fitScoreThreshold
+  const targetTitles = JSON.parse(String(prefs.target_titles || '[]')) as string[]
+  const languages = JSON.parse(String(profile.languages || '[]')) as Array<{ language: string; proficiency: string }>
+  const locationType = String(prefs.location_type || 'Remote, hybrid')
+  const homeCity = String(profile.location || '').split(',')[0].trim()
+  const profileSummary = String(profile.summary || '')
+  const skillNames = skills.map((s) => s.name)
+
+  const datasetPath = join(process.cwd(), 'eval-golden.json')
+  const dataset = JSON.parse(readFileSync(datasetPath, 'utf-8')) as { jobs: GoldenJob[] }
+
+  // Only jobs the pipeline routes to the LLM: pre-filter passes, LLM decides.
+  const llmJobs = dataset.jobs.filter(
+    (j) => j.ground_truth.filter_expected === null || j.ground_truth.filter_expected === 'llm-score-low'
+  )
+
+  const model = getConfig().llm.provider === 'openrouter'
+    ? getConfig().llm.openrouterRatingModel
+    : getConfig().llm.provider
+
+  const results: GoldenScoringResult[] = []
+  for (const [i, job] of llmJobs.entries()) {
+    // Pace calls to stay under free-tier per-minute limits (~20 req/min).
+    if (i > 0) await new Promise((r) => setTimeout(r, 1500))
+    const { score, reasoning } = await scoreJobRelevance(
+      job.title, job.job_description, profileSummary, skillNames, targetTitles,
+      work, languages, locationType, homeCity
+    )
+    const actualPass = score >= threshold
+    const expectedPass = job.ground_truth.should_pass
+    results.push({
+      id: job.id, title: job.title, company: job.company, category: job.ground_truth.category,
+      score, reasoning, expected_pass: expectedPass, actual_pass: actualPass,
+      correct: actualPass === expectedPass,
+    })
+  }
+
+  const total = results.length
+  const correct = results.filter((r) => r.correct).length
+  const wrong = results.filter((r) => !r.correct)
+  // Split accuracy by direction so we see false-positives vs false-negatives.
+  const shouldPass = results.filter((r) => r.expected_pass)
+  const shouldFail = results.filter((r) => !r.expected_pass)
+  const passAcc = shouldPass.filter((r) => r.correct).length
+  const failAcc = shouldFail.filter((r) => r.correct).length
+
+  const lines: string[] = [
+    `Golden LLM Scoring Report`,
+    `Evaluated: ${new Date().toISOString()}`,
+    `Model: ${model} (threshold ${threshold})`,
+    ``,
+    `Overall: ${correct}/${total} correct (${Math.round(correct / total * 100)}%)`,
+    `  Should pass (score >= ${threshold}): ${passAcc}/${shouldPass.length} correct`,
+    `  Should score low (< ${threshold}):   ${failAcc}/${shouldFail.length} correct`,
+  ]
+  if (wrong.length > 0) {
+    lines.push(``, `Misclassified:`)
+    for (const r of wrong) {
+      lines.push(`  [${r.id}] ${r.title} @ ${r.company} — scored ${r.score}, expected ${r.expected_pass ? 'pass' : 'low'} (${r.category})`)
+    }
+  }
+
+  const report = lines.join('\n')
+  const exportData = {
+    evaluated_at: new Date().toISOString(),
+    model,
+    threshold,
+    accuracy: { correct, total, pct: Math.round(correct / total * 100) },
+    by_direction: {
+      should_pass: { correct: passAcc, total: shouldPass.length },
+      should_score_low: { correct: failAcc, total: shouldFail.length },
+    },
+    results,
+  }
+
+  const filePath = outputPath || join(process.cwd(), 'eval-golden-scoring-results.json')
   writeFileSync(filePath, JSON.stringify(exportData, null, 2), 'utf-8')
 
   return { filePath, report }

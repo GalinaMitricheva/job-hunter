@@ -96,20 +96,51 @@ function ollamaComplete(
   })
 }
 
+// Errors that carry retry intent from a single OpenRouter attempt.
+interface RetryableError extends Error { retryable?: boolean; retryAfterMs?: number }
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
 // OpenRouter exposes an OpenAI-compatible /chat/completions endpoint.
 // Implemented with raw https (like ollamaComplete) to avoid an extra SDK dependency.
-function openrouterComplete(
+// Free models are frequently "rate-limited upstream" (429), so retry transient
+// failures with backoff before giving up to the caller's fallback.
+async function openrouterComplete(
   prompt: string,
   system: string | undefined,
   baseUrl: string,
   apiKey: string,
   model: string,
-  timeoutSec = 120
+  timeoutSec = 120,
+  maxRetries = 3
+): Promise<string> {
+  if (!apiKey) throw new Error('No OpenRouter API key found. Set llm.openrouterApiKey in config.json.')
+  if (!model) throw new Error('No OpenRouter model configured. Set llm.openrouterRatingModel / openrouterTailoringModel in config.json.')
+
+  let lastErr: RetryableError | undefined
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await openrouterAttempt(prompt, system, baseUrl, apiKey, model, timeoutSec)
+    } catch (e) {
+      lastErr = e as RetryableError
+      if (!lastErr.retryable || attempt === maxRetries) throw lastErr
+      // Honor server-provided Retry-After when present, else exponential backoff (1s, 2s, 4s...).
+      const backoff = lastErr.retryAfterMs ?? 1000 * 2 ** attempt
+      await sleep(backoff)
+    }
+  }
+  throw lastErr ?? new Error('OpenRouter request failed')
+}
+
+function openrouterAttempt(
+  prompt: string,
+  system: string | undefined,
+  baseUrl: string,
+  apiKey: string,
+  model: string,
+  timeoutSec: number
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    if (!apiKey) { reject(new Error('No OpenRouter API key found. Set llm.openrouterApiKey in config.json.')); return }
-    if (!model) { reject(new Error('No OpenRouter model configured. Set llm.openrouterRatingModel / openrouterTailoringModel in config.json.')); return }
-
     const messages = [
       ...(system ? [{ role: 'system', content: system }] : []),
       { role: 'user', content: prompt },
@@ -117,6 +148,13 @@ function openrouterComplete(
     const payload = JSON.stringify({ model, messages })
     // baseUrl carries a path ("/api/v1"), so append relatively rather than with an absolute-path URL.
     const url = new URL(baseUrl.replace(/\/+$/, '') + '/chat/completions')
+
+    const fail = (message: string, retryable = false, retryAfterMs?: number) => {
+      const err: RetryableError = new Error(message)
+      err.retryable = retryable
+      if (retryAfterMs !== undefined) err.retryAfterMs = retryAfterMs
+      reject(err)
+    }
 
     const req = (url.protocol === 'https:' ? httpsRequest : httpRequest)(
       {
@@ -140,32 +178,37 @@ function openrouterComplete(
         res.on('end', () => {
           const status = res.statusCode ?? 0
           if (status === 429) {
-            reject(new Error(`OpenRouter rate limited (429). Free models allow ~20 req/min, 200 req/day. Body: ${body.slice(0, 200)}`))
+            const retryAfter = Number(res.headers['retry-after'])
+            fail(
+              `OpenRouter rate limited (429). Free models allow ~20 req/min, 200 req/day. Body: ${body.slice(0, 200)}`,
+              true,
+              Number.isFinite(retryAfter) ? retryAfter * 1000 : undefined
+            )
             return
           }
-          if (status < 200 || status >= 300) {
-            reject(new Error(`OpenRouter error ${status}: ${body.slice(0, 300)}`))
-            return
-          }
+          // 5xx are transient upstream/gateway errors — worth retrying.
+          if (status >= 500) { fail(`OpenRouter error ${status}: ${body.slice(0, 300)}`, true); return }
+          if (status < 200 || status >= 300) { fail(`OpenRouter error ${status}: ${body.slice(0, 300)}`); return }
           try {
             const obj = JSON.parse(body) as {
               choices?: Array<{ message?: { content?: string } }>
-              error?: { message?: string }
+              error?: { message?: string; code?: number }
             }
             // Some errors return 200 with an { error } payload.
-            if (obj.error) { reject(new Error(`OpenRouter error: ${obj.error.message ?? 'unknown'}`)); return }
+            if (obj.error) { fail(`OpenRouter error: ${obj.error.message ?? 'unknown'}`, obj.error.code === 429); return }
             const content = obj.choices?.[0]?.message?.content
-            if (typeof content !== 'string') { reject(new Error(`OpenRouter returned no content: ${body.slice(0, 200)}`)); return }
+            if (typeof content !== 'string') { fail(`OpenRouter returned no content: ${body.slice(0, 200)}`); return }
             resolve(content)
           } catch (e) {
-            reject(new Error(`Could not parse OpenRouter response: ${(e as Error).message}\n${body.slice(0, 200)}`))
+            fail(`Could not parse OpenRouter response: ${(e as Error).message}\n${body.slice(0, 200)}`)
           }
         })
       }
     )
 
-    req.on('timeout', () => { req.destroy(); reject(new Error(`OpenRouter request timed out after ${timeoutSec}s`)) })
-    req.on('error', reject)
+    // Network-level failures are transient — allow a retry.
+    req.on('timeout', () => { req.destroy(); fail(`OpenRouter request timed out after ${timeoutSec}s`, true) })
+    req.on('error', (e) => fail(e.message, true))
     req.write(payload)
     req.end()
   })
