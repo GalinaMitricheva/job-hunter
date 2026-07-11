@@ -3,10 +3,24 @@ import { request as httpRequest } from 'http'
 import { request as httpsRequest } from 'https'
 import { getConfig } from '../config'
 
-export async function llmComplete(prompt: string, system?: string): Promise<string> {
+// Some tasks (rating, tailoring) may want a different model than others.
+// Only the OpenRouter provider varies its model by task; claude/ollama ignore it.
+export type LlmTask = 'rating' | 'tailoring'
+
+export interface LlmOptions {
+  task?: LlmTask
+}
+
+export async function llmComplete(prompt: string, system?: string, opts?: LlmOptions): Promise<string> {
   const cfg = getConfig()
   if (cfg.llm.provider === 'claude') {
     return claudeComplete(prompt, system, cfg.llm.model)
+  }
+  if (cfg.llm.provider === 'openrouter') {
+    const model = opts?.task === 'tailoring'
+      ? (cfg.llm.openrouterTailoringModel || cfg.llm.openrouterRatingModel)
+      : (cfg.llm.openrouterRatingModel || cfg.llm.openrouterTailoringModel)
+    return openrouterComplete(prompt, system, cfg.llm.openrouterBaseUrl, cfg.llm.openrouterApiKey, model)
   }
   return ollamaComplete(prompt, system, cfg.llm.ollamaBaseUrl, cfg.llm.ollamaModel, cfg.llm.ollamaTimeoutSec ?? 600)
 }
@@ -82,8 +96,83 @@ function ollamaComplete(
   })
 }
 
-export async function llmJson<T>(prompt: string, system?: string): Promise<T> {
-  const raw = await llmComplete(prompt, system)
+// OpenRouter exposes an OpenAI-compatible /chat/completions endpoint.
+// Implemented with raw https (like ollamaComplete) to avoid an extra SDK dependency.
+function openrouterComplete(
+  prompt: string,
+  system: string | undefined,
+  baseUrl: string,
+  apiKey: string,
+  model: string,
+  timeoutSec = 120
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!apiKey) { reject(new Error('No OpenRouter API key found. Set llm.openrouterApiKey in config.json.')); return }
+    if (!model) { reject(new Error('No OpenRouter model configured. Set llm.openrouterRatingModel / openrouterTailoringModel in config.json.')); return }
+
+    const messages = [
+      ...(system ? [{ role: 'system', content: system }] : []),
+      { role: 'user', content: prompt },
+    ]
+    const payload = JSON.stringify({ model, messages })
+    // baseUrl carries a path ("/api/v1"), so append relatively rather than with an absolute-path URL.
+    const url = new URL(baseUrl.replace(/\/+$/, '') + '/chat/completions')
+
+    const req = (url.protocol === 'https:' ? httpsRequest : httpRequest)(
+      {
+        hostname: url.hostname,
+        port: url.port || (url.protocol === 'https:' ? 443 : 80),
+        path: url.pathname,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload),
+          'Authorization': `Bearer ${apiKey}`,
+          // OpenRouter recommends these to identify the app; harmless if absent.
+          'HTTP-Referer': 'https://github.com/GalinaMitricheva/job-hunter',
+          'X-Title': 'Job Hunter Agent',
+        },
+        timeout: timeoutSec * 1000
+      },
+      (res) => {
+        let body = ''
+        res.on('data', (chunk: Buffer) => { body += chunk.toString() })
+        res.on('end', () => {
+          const status = res.statusCode ?? 0
+          if (status === 429) {
+            reject(new Error(`OpenRouter rate limited (429). Free models allow ~20 req/min, 200 req/day. Body: ${body.slice(0, 200)}`))
+            return
+          }
+          if (status < 200 || status >= 300) {
+            reject(new Error(`OpenRouter error ${status}: ${body.slice(0, 300)}`))
+            return
+          }
+          try {
+            const obj = JSON.parse(body) as {
+              choices?: Array<{ message?: { content?: string } }>
+              error?: { message?: string }
+            }
+            // Some errors return 200 with an { error } payload.
+            if (obj.error) { reject(new Error(`OpenRouter error: ${obj.error.message ?? 'unknown'}`)); return }
+            const content = obj.choices?.[0]?.message?.content
+            if (typeof content !== 'string') { reject(new Error(`OpenRouter returned no content: ${body.slice(0, 200)}`)); return }
+            resolve(content)
+          } catch (e) {
+            reject(new Error(`Could not parse OpenRouter response: ${(e as Error).message}\n${body.slice(0, 200)}`))
+          }
+        })
+      }
+    )
+
+    req.on('timeout', () => { req.destroy(); reject(new Error(`OpenRouter request timed out after ${timeoutSec}s`)) })
+    req.on('error', reject)
+    req.write(payload)
+    req.end()
+  })
+}
+
+export async function llmJson<T>(prompt: string, system?: string, opts?: LlmOptions): Promise<T> {
+  const raw = await llmComplete(prompt, system, opts)
   return parseJsonFromLlm<T>(raw)
 }
 
@@ -196,7 +285,8 @@ Step 2: For each hard requirement, decide: does the candidate profile above clea
 Step 3: Score 0-100. Start at 100 and deduct 20-30 pts for each gap. A job with 2+ gaps should score below 50.
 missingRequirements must list ONLY things the job explicitly requires that the candidate does NOT have. Never list things the candidate has.`,
       `You are a strict job match evaluator. Protect the candidate from wasting time on roles they cannot do.
-Respond with valid JSON only: {"score":<0-100>,"reasoning":"<2 sentences: what fits and what gaps exist>","missingRequirements":["<job requirement the candidate lacks>"]}`
+Respond with valid JSON only: {"score":<0-100>,"reasoning":"<2 sentences: what fits and what gaps exist>","missingRequirements":["<job requirement the candidate lacks>"]}`,
+      { task: 'rating' }
     )
     const verified = (result.missingRequirements || []).filter((req) => !hasSkill(req))
     return { score: result.score, reasoning: result.reasoning, missingRequirements: verified }
@@ -234,7 +324,8 @@ Respond with valid JSON only: {
   "tailoredSummary": "<rewritten 2-3 sentence professional summary>",
   "highlightedSkills": ["skill1", "skill2"],
   "reorderedExperience": [<array of work experience IDs in suggested order>]
-}`
+}`,
+      { task: 'tailoring' }
     )
   } catch {
     return {

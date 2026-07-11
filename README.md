@@ -2,7 +2,7 @@
 
 A local job-search agent that automates your job search end-to-end — it imports your CV, builds a comprehensive professional profile, runs scheduled searches on LinkedIn and company career pages, uses an LLM to score matches and tailor your CV per posting, and submits applications after you review and approve each one.
 
-**All data stays on your machine. No cloud required (optional Claude API or local Ollama).**
+**All data stays on your machine. No cloud required (optional Claude API, OpenRouter, or local Ollama).**
 
 ---
 
@@ -29,8 +29,9 @@ A local job-search agent that automates your job search end-to-end — it import
 |---|---|---|
 | **Node.js 20+** | Runs the agent | https://nodejs.org |
 | **Playwright Chromium** | LinkedIn scraping + auto-apply | `npx playwright install chromium` |
-| **Claude API key** *(or Ollama)* | LLM for scoring and tailoring | Set `ANTHROPIC_API_KEY` env var |
-| **Ollama** *(alternative to Claude)* | Local LLM option | https://ollama.com |
+| **Claude API key** *(or OpenRouter / Ollama)* | LLM for scoring and tailoring | Set `ANTHROPIC_API_KEY` env var |
+| **OpenRouter API key** *(alternative to Claude)* | Hosted free/cheap models for rating + CV tailoring | https://openrouter.ai/keys |
+| **Ollama** *(alternative to Claude)* | Local LLM option — not required if using Claude or OpenRouter | https://ollama.com |
 
 ---
 
@@ -60,7 +61,11 @@ Edit `config.json`:
     "claudeApiKey": "sk-ant-...",
     "model": "claude-sonnet-4-6",
     "ollamaBaseUrl": "http://localhost:11434",
-    "ollamaModel": "llama3.2"
+    "ollamaModel": "llama3.2",
+    "openrouterApiKey": "",
+    "openrouterBaseUrl": "https://openrouter.ai/api/v1",
+    "openrouterRatingModel": "openai/gpt-oss-120b:free",
+    "openrouterTailoringModel": "openai/gpt-oss-120b:free"
   },
   "search": {
     "schedule": "0 8 * * *",
@@ -174,12 +179,29 @@ Open `http://localhost:3000` in your browser after starting the agent.
 
 ## LLM Configuration
 
-Switch between Claude and Ollama in `config.json`:
+Switch providers with the `llm.provider` field in `config.json`:
 
 **Claude (recommended):**
 ```json
 "llm": { "provider": "claude", "claudeApiKey": "sk-ant-...", "model": "claude-sonnet-4-6" }
 ```
+
+**OpenRouter (hosted free/cheap models):**
+```json
+"llm": {
+  "provider": "openrouter",
+  "openrouterApiKey": "sk-or-...",
+  "openrouterBaseUrl": "https://openrouter.ai/api/v1",
+  "openrouterRatingModel": "openai/gpt-oss-120b:free",
+  "openrouterTailoringModel": "openai/gpt-oss-120b:free"
+}
+```
+
+OpenRouter is OpenAI-compatible and gives access to strong models at no cost, so **Ollama is not required** for position rating (`scoreJobRelevance`) or CV tailoring (`tailorCV`). The rating and tailoring models are configured independently — start with `openai/gpt-oss-120b:free` for both, and if tailoring prose disappoints, switch `openrouterTailoringModel` to `google/gemma-4-31b-it:free` (no code change needed).
+
+Notes:
+- Get a key at https://openrouter.ai/keys — no credit card needed for the free tier.
+- Free `:free` models are rate-limited (~20 req/min, 200 req/day) and can lose `:free` status without notice. Keep a fallback in mind (e.g. `nvidia/nemotron-3-super-120b-a12b:free` for rating). Rate-limit/errors fall back to the built-in defaults in each function.
 
 **Ollama (fully local, no API key):**
 ```json
@@ -225,7 +247,7 @@ LinkedIn's Terms of Service prohibit automated access. The agent mimics human br
 |---|---|
 | Runtime | Node.js + TypeScript (tsx, no build step) |
 | Database | SQLite (better-sqlite3) |
-| LLM | Claude API or Ollama (configurable) |
+| LLM | Claude API, OpenRouter, or Ollama (configurable) |
 | Job search | Playwright (Chromium) |
 | Auto-apply | Playwright form automation |
 | PDF generation | Playwright `page.pdf()` |

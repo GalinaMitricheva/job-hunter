@@ -5,7 +5,11 @@
     "model": "claude-sonnet-4-6",
     "ollamaBaseUrl": "http://localhost:11434",
     "ollamaModel": "llama3.2",
-    "ollamaTimeoutSec": 600
+    "ollamaTimeoutSec": 600,
+    "openrouterApiKey": "",
+    "openrouterBaseUrl": "https://openrouter.ai/api/v1",
+    "openrouterRatingModel": "openai/gpt-oss-120b:free",
+    "openrouterTailoringModel": "openai/gpt-oss-120b:free"
   },
   "search": {
     "schedule": "0 8 * * *",

@@ -3,12 +3,17 @@ import { join } from 'path'
 
 export interface AppConfig {
   llm: {
-    provider: 'claude' | 'ollama'
+    provider: 'claude' | 'ollama' | 'openrouter'
     claudeApiKey: string
     model: string
     ollamaBaseUrl: string
     ollamaModel: string
     ollamaTimeoutSec: number
+    // OpenRouter (OpenAI-compatible). Rating and tailoring can use different models.
+    openrouterApiKey: string
+    openrouterBaseUrl: string
+    openrouterRatingModel: string
+    openrouterTailoringModel: string
   }
   search: {
     schedule: string
