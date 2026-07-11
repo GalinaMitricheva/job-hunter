@@ -53,17 +53,31 @@ const BOARDS: BoardConfig[] = [
       ).catch(() => [])
     },
     extractDescription: async (page) => {
-      await page.waitForSelector('[class*="job-description"], [class*="jobdescription"], article', { timeout: 8000 }).catch(() => {})
-      return page.$eval('[class*="job-description"], [class*="jobdescription"], article', (el) => el.textContent?.trim() || '').catch(() => '')
+      // Stepstone uses data-at="jobdescription" on the description container; fall back to main
+      const SELECTOR = '[data-at="jobdescription"], [class*="JobDescription"], [class*="job-description"], [class*="jobdescription"], main'
+      await page.waitForSelector(SELECTOR, { timeout: 8000 }).catch(() => {})
+      return page.$eval(SELECTOR, (el) => (el as HTMLElement).innerText?.trim() || '').catch(() => '')
     },
   },
 ]
+
+// Playwright close() can hang indefinitely (notably on Windows), which is the
+// most common way this scraper freezes with no error. Bound every close so a
+// wedged teardown can't stall the whole run; the process exit reaps whatever
+// browser process is left behind.
+function closeQuietly(closable: { close: () => Promise<unknown> }, ms = 5000): Promise<unknown> {
+  return Promise.race([
+    closable.close().catch(() => {}),
+    new Promise((resolve) => setTimeout(resolve, ms)),
+  ])
+}
 
 export async function searchJobBoards(
   queries: string[],
   locations: string[],
   enabledBoards: string[],
-  headless: boolean
+  headless: boolean,
+  overallTimeoutMs = 300_000
 ): Promise<JobBoardListing[]> {
   const results: JobBoardListing[] = []
   const seen = new Set<string>()
@@ -77,53 +91,78 @@ export async function searchJobBoards(
     locale: 'en-US',
   })
 
-  try {
-    for (const board of boards) {
-      for (const query of queries.slice(0, 2)) {
-        for (const location of locations.slice(0, 2)) {
-          console.log(`  [${board.name}] Searching "${query}" in "${location}"...`)
-          const listPage = await context.newPage()
-          try {
-            await listPage.goto(board.buildUrl(query, location), { waitUntil: 'domcontentloaded', timeout: 25000 })
-            await listPage.waitForTimeout(2000)
-            const listings = await board.extractListings(listPage)
-            console.log(`    → ${listings.length} listing(s) found`)
+  // Flipped by the wall-clock guard so the loops stop issuing new navigations.
+  let finished = false
 
-            for (const item of listings) {
-              if (!item.url || !item.title || seen.has(item.url)) continue
-              seen.add(item.url)
+  const scrape = async (): Promise<void> => {
+    try {
+      for (const board of boards) {
+        for (const query of queries.slice(0, 2)) {
+          for (const location of locations.slice(0, 2)) {
+            if (finished) return
+            console.log(`  [${board.name}] Searching "${query}" in "${location}"...`)
+            const listPage = await context.newPage()
+            try {
+              await listPage.goto(board.buildUrl(query, location), { waitUntil: 'domcontentloaded', timeout: 25000 })
+              await listPage.waitForTimeout(2000)
+              const listings = await board.extractListings(listPage)
+              console.log(`    → ${listings.length} listing(s) found`)
 
-              const detailPage = await context.newPage()
-              try {
-                await detailPage.goto(item.url, { waitUntil: 'domcontentloaded', timeout: 20000 })
-                await detailPage.waitForTimeout(1000)
-                const description = await board.extractDescription(detailPage)
-                if (description.length > 100) {
-                  results.push({
-                    url: item.url,
-                    company: item.company || 'Unknown',
-                    title: item.title,
-                    location: item.location,
-                    postedDate: new Date().toISOString(),
-                    description: description.substring(0, 5000),
-                  })
+              for (const item of listings) {
+                if (finished) break
+                if (!item.url || !item.title || seen.has(item.url)) continue
+                seen.add(item.url)
+
+                const detailPage = await context.newPage()
+                try {
+                  await detailPage.goto(item.url, { waitUntil: 'domcontentloaded', timeout: 20000 })
+                  await detailPage.waitForTimeout(1000)
+                  const description = await board.extractDescription(detailPage)
+                  if (description.length > 100) {
+                    results.push({
+                      url: item.url,
+                      company: item.company || 'Unknown',
+                      title: item.title,
+                      location: item.location,
+                      postedDate: new Date().toISOString(),
+                      description: description.substring(0, 5000),
+                    })
+                  }
+                } catch { /* skip this listing */ } finally {
+                  await closeQuietly(detailPage)
                 }
-              } catch { /* skip this listing */ } finally {
-                await detailPage.close()
+                await new Promise((r) => setTimeout(r, 800 + Math.random() * 600))
               }
-              await new Promise((r) => setTimeout(r, 800 + Math.random() * 600))
+            } catch (err) {
+              console.warn(`    → [${board.name}] search failed: ${String(err)}`)
+            } finally {
+              await closeQuietly(listPage)
             }
-          } catch (err) {
-            console.warn(`    → [${board.name}] search failed: ${String(err)}`)
-          } finally {
-            await listPage.close()
           }
         }
       }
-    }
+    } catch { /* browser force-closed by the guard below — return what we have */ }
+  }
+
+  // Overall wall-clock guard. Per-page gotos have their own timeouts, but a
+  // stuck close() or an unresponsive site can still hang the run with no error.
+  // If the budget is exceeded, stop waiting and return partial results —
+  // runSearch continues to scoring rather than freezing.
+  let guard: NodeJS.Timeout | undefined
+  const budget = new Promise<void>((resolve) => {
+    guard = setTimeout(() => {
+      finished = true
+      console.warn(`    → job board search exceeded ${Math.round(overallTimeoutMs / 1000)}s; abandoning and closing browser`)
+      resolve()
+    }, overallTimeoutMs)
+  })
+
+  try {
+    await Promise.race([scrape().then(() => { finished = true }), budget])
   } finally {
-    await context.close()
-    await browser.close()
+    if (guard) clearTimeout(guard)
+    await closeQuietly(context)
+    await closeQuietly(browser)
   }
 
   return results
