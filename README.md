@@ -207,7 +207,9 @@ automatically retries it once on `llm.fallbackProvider` before giving up.
   "provider": "claude-cli",
   "fallbackProvider": "openrouter",
   "claudeCliCommand": "claude",
-  "claudeCliModel": "claude-haiku-4-5"
+  "claudeCliModel": "claude-haiku-4-5",
+  "claudeCliRatingModel": "claude-sonnet-4-6",
+  "claudeCliTailoringModel": "claude-haiku-4-5"
 }
 ```
 
@@ -221,8 +223,13 @@ quality than local/free models, with no per-token API charge. Setup:
 
 Notes:
 - Subject to Claude Code's usage limits (rolling 5-hour + weekly caps). The pre-filters keep LLM volume low, so a scheduled run is normally fine; if a call is throttled it falls back to `fallbackProvider`.
-- Use `claudeCliModel` to pick the model (`claude-haiku-4-5` is cheap and strong; use a Sonnet model for higher-quality tailoring).
+- **Rating and tailoring use separate models.** `claudeCliRatingModel` handles the reasoning-heavy relevance scoring (a Sonnet model is worth it here — see below), while `claudeCliTailoringModel` handles CV rewriting (Haiku is fine). Both fall back to `claudeCliModel` if left empty.
 - `claudeCliCommand` lets you point at a specific binary/path (e.g. `claude.cmd` on Windows) if `claude` isn't on PATH.
+
+> **Why Sonnet for rating?** The golden-scoring eval showed Haiku rejects bad
+> matches perfectly but under-scores genuine senior roles (false negatives).
+> A stronger rating model plus the calibrated prompt improves recall. Measure
+> any change with `npx tsx agent.ts eval --golden-scoring`.
 
 **Claude API (pay-per-token):**
 ```json

@@ -21,8 +21,12 @@ export interface AppConfig {
     openrouterTailoringModel: string
     // Headless Claude Code — runs on your Claude Pro/Max subscription (not the
     // paid API). Requires Claude Code installed and logged in on this machine.
+    // Rating and tailoring can use different models; claudeCliModel is the
+    // fallback used when the per-task field is empty.
     claudeCliCommand: string
     claudeCliModel: string
+    claudeCliRatingModel: string
+    claudeCliTailoringModel: string
   }
   search: {
     schedule: string

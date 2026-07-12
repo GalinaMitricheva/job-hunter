@@ -12,7 +12,9 @@
     "openrouterRatingModel": "openai/gpt-oss-120b:free",
     "openrouterTailoringModel": "openai/gpt-oss-120b:free",
     "claudeCliCommand": "claude",
-    "claudeCliModel": "claude-haiku-4-5"
+    "claudeCliModel": "claude-haiku-4-5",
+    "claudeCliRatingModel": "claude-sonnet-4-6",
+    "claudeCliTailoringModel": "claude-haiku-4-5"
   },
   "search": {
     "schedule": "0 8 * * *",

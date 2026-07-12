@@ -31,8 +31,12 @@ function callProvider(provider: LlmProvider, prompt: string, system: string | un
   switch (provider) {
     case 'claude':
       return claudeComplete(prompt, system, cfg.llm.model)
-    case 'claude-cli':
-      return claudeCliComplete(prompt, system, cfg.llm.claudeCliCommand || 'claude', cfg.llm.claudeCliModel)
+    case 'claude-cli': {
+      const model = opts?.task === 'tailoring'
+        ? (cfg.llm.claudeCliTailoringModel || cfg.llm.claudeCliModel)
+        : (cfg.llm.claudeCliRatingModel || cfg.llm.claudeCliModel)
+      return claudeCliComplete(prompt, system, cfg.llm.claudeCliCommand || 'claude', model)
+    }
     case 'openrouter': {
       const model = opts?.task === 'tailoring'
         ? (cfg.llm.openrouterTailoringModel || cfg.llm.openrouterRatingModel)
@@ -411,12 +415,24 @@ Job posting:
 - Title: ${jobTitle}
 - Description: ${jobDescription.substring(0, 2000)}
 
-Step 1: List the hard requirements stated in the job description (required skills, years of experience, domain knowledge, must-have tools, required languages, work location).
-Step 2: For each hard requirement, decide: does the candidate profile above clearly satisfy it? If yes, skip it. If no, it is a gap. Treat an on-site-only requirement outside ${candidateCity} as a location gap.
-Step 3: Score 0-100. Start at 100 and deduct 20-30 pts for each gap. A job with 2+ gaps should score below 50.
-missingRequirements must list ONLY things the job explicitly requires that the candidate does NOT have. Never list things the candidate has.`,
-      `You are a strict job match evaluator. Protect the candidate from wasting time on roles they cannot do.
-Respond with valid JSON only: {"score":<0-100>,"reasoning":"<2 sentences: what fits and what gaps exist>","missingRequirements":["<job requirement the candidate lacks>"]}`,
+Step 1: List the HARD requirements stated in the job (required skills, minimum years, must-have domain, required tools, required languages, work location). Ignore "nice to have", "plus", and "bonus" items.
+Step 2: For each hard requirement, decide whether the candidate clearly satisfies it. Count it as a gap ONLY if the candidate plainly does not. Treat an on-site-only requirement outside ${candidateCity} (with no remote/hybrid option) as a location gap.
+Step 3: Score 0-100 using the calibration guide in the system prompt. Do NOT deduct for nice-to-have items, or for things the candidate plausibly has.
+missingRequirements lists ONLY hard requirements the candidate lacks. Never list things the candidate has.`,
+      `You are an experienced technical recruiter scoring how well a candidate fits a role. Be fair, not pessimistic: a candidate who clearly meets the role's core function and seniority should score high even when a few nice-to-have items are missing. Push the score low only when the candidate lacks a genuine HARD requirement — wrong function, far off on seniority, a required skill/domain they plainly do not have, or an on-site location they cannot meet.
+
+Calibration:
+- 85-100: meets core function + seniority, strong domain overlap, at most minor nice-to-have gaps.
+- 65-84: right function and seniority, but missing one meaningful requirement or only partial domain overlap.
+- 40-64: one clear hard-requirement gap (e.g. a required on-site location the candidate cannot meet, or a core skill absent).
+- 0-39: wrong function, far below/above seniority, or multiple hard-requirement gaps.
+
+Worked examples (candidate = Product Manager, 6y B2B SaaS, stakeholder management, fluent English, based in Munich, prefers remote/hybrid):
+- Job "Senior Product Manager, B2B SaaS, 5+ yrs, stakeholder management, Munich hybrid" -> {"score":92,"reasoning":"Meets every hard requirement with strong domain overlap; no gaps.","missingRequirements":[]}
+- Job "Senior Backend Engineer, 5+ yrs Java/Kubernetes, on-site" -> {"score":15,"reasoning":"Wrong function: an engineering role requiring Java/Kubernetes the candidate does not have.","missingRequirements":["Backend engineering (Java, Kubernetes)"]}
+- Job "Senior Product Manager, fintech, on-site in Berlin only" -> {"score":58,"reasoning":"Right function and seniority, but on-site in Berlin which the candidate cannot meet.","missingRequirements":["On-site availability in Berlin"]}
+
+Respond with valid JSON only: {"score":<0-100>,"reasoning":"<1-2 sentences: what fits and any real gaps>","missingRequirements":["<hard requirement the candidate lacks>"]}`,
       { task: 'rating' }
     )
     const verified = (result.missingRequirements || []).filter((req) => !hasSkill(req))
